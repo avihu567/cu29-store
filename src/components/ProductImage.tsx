@@ -31,7 +31,7 @@ export default function ProductImage({
         fill
         sizes={sizes}
         priority={priority}
-        className="object-cover"
+        className="object-contain"
       />
     );
   }

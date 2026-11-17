@@ -80,7 +80,7 @@ export default function CartView({
           <li key={key} className="flex gap-5 py-6">
             <Link
               href={`/product/${product.slug}`}
-              className="relative h-28 w-24 shrink-0 overflow-hidden rounded-2xl bg-cream"
+              className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-2xl bg-white ring-1 ring-line/60"
             >
               <ProductImage
                 src={images[product.slug]}

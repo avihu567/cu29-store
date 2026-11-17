@@ -9,7 +9,7 @@ import FinalCta from "@/components/pdp/FinalCta";
 import ProductHero from "@/components/pdp/ProductHero";
 import ProductReviews from "@/components/pdp/ProductReviews";
 import RitualStory from "@/components/pdp/RitualStory";
-import { getProductImages } from "@/lib/product-images";
+import { getGallery } from "@/lib/product-images";
 import { getCategory, getProduct, getSizeVariants, products } from "@/lib/products";
 import { ratingSummary, reviewsFor } from "@/lib/reviews";
 
@@ -66,7 +66,7 @@ async function ProductContent({ params }: { params: Promise<{ slug: string }> })
   const sizes = getSizeVariants(product);
   const variants = sizes.length > 1 ? sizes : [product];
   const imagesBySlug = Object.fromEntries(
-    variants.map((v) => [v.slug, getProductImages(v.imageDir)]),
+    variants.map((v) => [v.slug, getGallery(v)]),
   );
 
   return (

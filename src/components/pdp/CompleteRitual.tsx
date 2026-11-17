@@ -1,7 +1,7 @@
 import Link from "next/link";
 import ProductImage from "../ProductImage";
 import QuickAddButton from "./QuickAddButton";
-import { getMainImage } from "@/lib/product-images";
+import { getGallery } from "@/lib/product-images";
 import { formatPrice, products, whatsappLink, type Product } from "@/lib/products";
 
 /** The best-selling item of each other category, so the set "completes" the ritual. */
@@ -39,10 +39,10 @@ export default function CompleteRitual({ product }: { product: Product }) {
         <ul className="grid gap-x-6 gap-y-12 sm:grid-cols-3">
           {items.map((p) => (
             <li key={p.slug} className="reveal group flex flex-col">
-              <Link href={`/product/${p.slug}`} className="relative block aspect-[4/5] overflow-hidden rounded-[var(--radius-card)] bg-cream ring-1 ring-transparent transition-all duration-500 group-hover:-translate-y-1.5 group-hover:shadow-[var(--shadow-lift)] group-hover:ring-copper/35">
+              <Link href={`/product/${p.slug}`} className="relative block aspect-square overflow-hidden rounded-[var(--radius-card)] bg-white ring-1 ring-line/60 transition-all duration-500 group-hover:-translate-y-1.5 group-hover:shadow-[var(--shadow-lift)] group-hover:ring-copper/35">
                 <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.06]">
                   <ProductImage
-                    src={getMainImage(p.imageDir)}
+                    src={getGallery(p)[0]?.src}
                     art={p.art}
                     alt={p.name}
                     sizes="(min-width: 640px) 33vw, 100vw"

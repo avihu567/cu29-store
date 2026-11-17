@@ -8,6 +8,7 @@ import {
   formatPrice,
   orderMessage,
   whatsappLink,
+  type GalleryImage,
   type Product,
   type RingColorId,
 } from "@/lib/products";
@@ -25,7 +26,7 @@ interface Props {
   /** Size variants of the product family (or just the product itself). */
   variants: Product[];
   initialSlug: string;
-  imagesBySlug: Record<string, string[]>;
+  imagesBySlug: Record<string, GalleryImage[]>;
   categoryName: string;
   rating: { average: number; count: number };
 }
@@ -85,7 +86,7 @@ export default function ProductHero({
   return (
     <section id="buy" className="scroll-mt-32">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 pb-16 pt-6 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:gap-20 lg:px-8 lg:pb-24">
-        <div className="mx-auto w-full max-w-lg lg:sticky lg:top-32 lg:max-w-none lg:self-start">
+        <div className="mx-auto w-full min-w-0 max-w-lg lg:sticky lg:top-32 lg:max-w-none lg:self-start">
           <Gallery
             key={product.slug}
             images={imagesBySlug[product.slug] ?? []}

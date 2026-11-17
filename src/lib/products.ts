@@ -32,6 +32,13 @@ export const RING_COLORS: Record<RingColorId, RingColor> = {
   terracotta: { id: "terracotta", name: "ורוד עתיק", pantone: "Pantone 7516 C", hex: "#9A3A06" },
 };
 
+export interface GalleryImage {
+  /** Public path, e.g. /products/bottles-500ml/cu29-copper-bottle-500ml-1.jpg */
+  src: string;
+  /** Hebrew alt text */
+  alt: string;
+}
+
 export interface Product {
   slug: string;
   name: string;
@@ -44,6 +51,12 @@ export interface Product {
   category: CategoryId;
   /** Folder under /public/products/ that holds this product's photos. */
   imageDir: string;
+  /**
+   * Explicit, ordered photo gallery (position 1 = main image, also used on
+   * product cards; position 2 = card hover image). When omitted, the photos
+   * in imageDir are used in filename order.
+   */
+  gallery?: GalleryImage[];
   /** Short size label, shown in the size switcher (e.g. "500 מ״ל"). */
   size?: string;
   /** Products sharing a sizeGroup are linked by the size switcher on the PDP. */
@@ -130,6 +143,25 @@ export const categories: Category[] = [
 const PURE_COPPER = { label: "חומר", value: "99.9% נחושת טהורה" };
 const NO_LINING = { label: "ציפוי פנימי", value: "ללא, מגע ישיר עם הנחושת" };
 const RING_SPEC = { label: "טבעת סיליקון", value: "פחם או ורוד עתיק" };
+/** Shared size-comparison photo, position 5 on every bottle. */
+const SIZE_COMPARISON: GalleryImage = {
+  src: "/products/shared/cu29-copper-bottles-500-700-950ml-size-comparison.jpg",
+  alt: `שלושת הגדלים של בקבוקי הנחושת CU29: 500, 700 ו-950 מ"ל`,
+};
+
+/** The fixed 6-photo order for a bottle size (see product photo brief). */
+function bottleGallery(ml: number, lifestyleAlt: string): GalleryImage[] {
+  const file = (n: number) => `/products/bottles-${ml}ml/cu29-copper-bottle-${ml}ml-${n}.jpg`;
+  return [
+    { src: file(1), alt: `בקבוק נחושת טהורה CU29 בנפח ${ml} מ"ל על רקע לבן` },
+    { src: file(2), alt: `בקבוק נחושת CU29 ${ml} מ"ל עם טיפות מים` },
+    { src: file(3), alt: `בקבוק נחושת CU29 ${ml} מ"ל פתוח, עם המכסה והתחתית החרוטה בלוגו` },
+    { src: file(4), alt: `בקבוק נחושת CU29 ${ml} מ"ל לצד אריזת המתנה THE CU RITUAL` },
+    SIZE_COMPARISON,
+    { src: file(6), alt: lifestyleAlt },
+  ];
+}
+
 const BOTTLE_FAMILY = {
   title: "בקבוק נחושת טהורה",
   titleEn: "The Pure Metal Bottle",
@@ -148,6 +180,7 @@ export const products: Product[] = [
     subtitle: "קומפקטי, לתיק ולדרכים",
     category: "bottles",
     imageDir: "bottles-500ml",
+    gallery: bottleGallery(500, `בקבוק נחושת CU29 500 מ"ל על שולחן עבודה מעץ`),
     size: "500 מ״ל",
     sizeGroup: "bottle",
     ...BOTTLE_FAMILY,
@@ -163,6 +196,7 @@ export const products: Product[] = [
     subtitle: "המידה היומיומית",
     category: "bottles",
     imageDir: "bottles-700ml",
+    gallery: bottleGallery(700, `בקבוק נחושת CU29 700 מ"ל על שידת לילה ליד המיטה`),
     size: "700 מ״ל",
     sizeGroup: "bottle",
     ...BOTTLE_FAMILY,
@@ -179,6 +213,7 @@ export const products: Product[] = [
     subtitle: "בקבוק הסיגנצ׳ר של CU29",
     category: "bottles",
     imageDir: "bottles-950ml",
+    gallery: bottleGallery(950, `בקבוק נחושת CU29 950 מ"ל על משטח מטבח באור בוקר, לצד כוס מים`),
     size: "950 מ״ל",
     sizeGroup: "bottle",
     ...BOTTLE_FAMILY,

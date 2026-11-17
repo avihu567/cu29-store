@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import CartView from "@/components/CartView";
 import { Container } from "@/components/ui";
-import { getMainImage } from "@/lib/product-images";
+import { getGallery } from "@/lib/product-images";
 import { products } from "@/lib/products";
 
 export const metadata: Metadata = { title: "סל קניות" };
@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "סל קניות" };
 export default function CartPage() {
   // Resolved on the server: the client cart can't read /public folders.
   const images = Object.fromEntries(
-    products.map((p) => [p.slug, getMainImage(p.imageDir)]),
+    products.map((p) => [p.slug, getGallery(p)[0]?.src]),
   );
 
   return (
