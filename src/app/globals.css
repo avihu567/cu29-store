@@ -1,0 +1,238 @@
+@import "tailwindcss";
+
+/*
+ * CU29 — earthy, artisanal palette.
+ * Linen and rich sand for surfaces, terracotta and stone undertones,
+ * tobacco browns for depth, copper as the glowing accent. Nothing clinical.
+ */
+@theme {
+  /* Surfaces (light → deeper) */
+  --color-paper: #f6efe4; /* unbleached paper: cards */
+  --color-ivory: #ffffff; /* the page: pure white */
+  --color-cream: #e9dccb; /* rich sand: sections */
+  --color-sand: #ddcbb4;
+  --color-terra: #e6cbb5; /* soft terracotta wash */
+  --color-stone-warm: #d5c6b2; /* tactile stone */
+  --color-line: #d8c6ae; /* hand-drawn sandy line */
+  --color-stone-muted: #c4ae94;
+  --color-wood-light: #dccab2;
+  --color-wood: #9a774f;
+
+  /* Text */
+  --color-ink: #2c221e; /* warm charcoal-tobacco, never pure black */
+  --color-stone: #6e5a4a;
+
+  /* Depth: warm tobacco browns instead of black/grey */
+  --color-tobacco: #5b3f2c;
+  --color-tobacco-deep: #33241a;
+  --color-charcoal: #25282a; /* Pantone 426 C — ring swatch only */
+
+  /* Accents */
+  --color-clay: #b8694c;
+  --color-terracotta: #9a3a06; /* Pantone 7516 C — ring swatch */
+  --color-copper: #b87333;
+  --color-copper-deep: #ad5f2b;
+  --color-copper-dark: #8e4f22;
+  --color-copper-light: #d9a272;
+  --color-copper-pale: #edd2b9;
+
+  /* One soft, rounded family for everything (Hebrew + Latin). "font-serif" in
+     components now means "heading voice" and maps to the same family. */
+  --font-sans: var(--font-rubik), system-ui, sans-serif;
+  --font-serif: var(--font-rubik), system-ui, sans-serif;
+  /* Accent only: the English brand line */
+  --font-display: var(--font-cormorant), Georgia, serif;
+
+  /* Slightly irregular, hand-formed corners (used via rounded-[var(--radius-card)]) */
+  --radius-card: 2.1rem 1.7rem 2.3rem 1.85rem / 1.85rem 2.25rem 1.7rem 2.1rem;
+  --radius-organic: 2.75rem 2rem 3rem 2.25rem / 2.25rem 2.9rem 2rem 2.6rem;
+
+  /* Warm, low shadows (brown, not grey) */
+  --shadow-soft: 0 24px 50px -32px rgb(91 63 44 / 0.45);
+  --shadow-lift: 0 34px 70px -34px rgb(91 63 44 / 0.6);
+  --shadow-glow: 0 16px 36px -14px rgb(173 95 43 / 0.65);
+}
+
+/* ───────── Typography: airy, editorial headings ───────── */
+/*
+ * Calm hierarchy (unlayered, so it wins over per-component weight utilities):
+ *   headings  → medium 500, generous tracking
+ *   body      → regular 400
+ *   subtitles → light 300 (.text-subtle / intro paragraphs)
+ */
+body {
+  font-weight: 400;
+  letter-spacing: 0.005em;
+}
+h1,
+h2,
+h3 {
+  color: inherit;
+  font-weight: 500;
+  letter-spacing: 0.035em;
+  text-wrap: balance;
+}
+/* Large display titles read heavier, so they step down to regular */
+h1 {
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+p {
+  text-wrap: pretty;
+}
+.text-subtle {
+  font-weight: 300;
+  letter-spacing: 0.015em;
+}
+/* English brand line: classic display serif, kept light */
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 300 !important;
+  letter-spacing: 0.01em;
+}
+
+/* ───────── Copper buttons: a slow metallic sweep on hover ───────── */
+.btn-copper {
+  background-image: linear-gradient(115deg, #d08f55 0%, #b87333 38%, #a35a28 70%, #c98447 100%);
+  background-size: 220% 100%;
+  background-position: 0% 50%;
+  color: var(--color-paper);
+  box-shadow: var(--shadow-glow);
+  transition:
+    background-position 0.7s ease,
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
+}
+.btn-copper:hover {
+  background-position: 100% 50%;
+  transform: translateY(-2px);
+  box-shadow: 0 22px 44px -16px rgb(173 95 43 / 0.75);
+}
+.btn-copper:active {
+  transform: translateY(0);
+}
+
+/* Soft lift for secondary buttons and cards */
+.lift {
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.45s ease,
+    border-color 0.3s ease;
+}
+.lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lift);
+}
+
+/* Animated copper underline for text links */
+.link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-repeat: no-repeat;
+  background-position: 100% 100%;
+  transition:
+    background-size 0.4s ease,
+    color 0.3s ease;
+}
+.link-underline:hover {
+  background-size: 100% 1px;
+}
+
+/* Gentle warm glows for "earthy undertone" sections */
+.warm-glow {
+  background-image:
+    radial-gradient(60% 50% at 100% 0%, rgb(241 223 204 / 0.7), transparent 70%),
+    radial-gradient(50% 45% at 0% 100%, rgb(230 217 199 / 0.6), transparent 70%);
+}
+
+/* ───────── Tactile surfaces ───────── */
+/* Mottled stone: soft patches of sand, clay and shade */
+.texture-stone {
+  background-image:
+    radial-gradient(38% 30% at 18% 22%, rgb(255 246 232 / 0.55), transparent 70%),
+    radial-gradient(30% 26% at 82% 30%, rgb(196 140 102 / 0.14), transparent 70%),
+    radial-gradient(42% 34% at 70% 85%, rgb(120 88 60 / 0.1), transparent 70%),
+    radial-gradient(26% 22% at 30% 78%, rgb(230 203 181 / 0.6), transparent 70%);
+}
+/* Terracotta clay wash with a faint fired-earth warmth */
+.texture-clay {
+  background-color: var(--color-terra);
+  background-image:
+    radial-gradient(60% 50% at 85% 10%, rgb(249 232 214 / 0.7), transparent 70%),
+    radial-gradient(45% 40% at 10% 90%, rgb(170 92 58 / 0.16), transparent 70%);
+}
+.radius-organic {
+  border-radius: var(--radius-organic);
+}
+
+/* ───────── Scroll fade-in (CSS scroll-driven; no JS) ───────── */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    translate: 0 1.75rem;
+    scale: 0.985;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
+    }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Clean, crisp white page. Warm tones live in individual panels and cards. */
+body {
+  background-color: #ffffff;
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-copper-pale);
+  color: var(--color-copper-dark);
+}
+
+/* Copper that "glows": a soft metallic gradient for display text and fills. */
+.text-copper-glow {
+  background: linear-gradient(100deg, #8e4f22 0%, #c98447 35%, #e8b88a 50%, #b87333 70%, #8e4f22 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Late-afternoon window light falling across a wall. */
+.window-light {
+  background:
+    linear-gradient(115deg, transparent 0 38%, rgb(255 244 228 / 0.55) 38% 46%, transparent 46% 52%, rgb(255 244 228 / 0.4) 52% 58%, transparent 58%),
+    radial-gradient(120% 90% at 85% 10%, #f6ead9 0%, transparent 60%),
+    linear-gradient(180deg, #efe5d8 0%, #e6d8c6 100%);
+}
+
+@keyframes slow-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-slow-spin {
+  animation: slow-spin 60s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-slow-spin {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
