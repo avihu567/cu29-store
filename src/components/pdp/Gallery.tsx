@@ -67,7 +67,6 @@ export default function Gallery({
               key={src}
               type="button"
               onClick={() => setActive(i)}
-              aria-label={`הצגת תמונה ${i + 1}`}
               aria-current={i === active}
               className={`relative aspect-square w-20 shrink-0 overflow-hidden rounded-2xl bg-cream transition ${
                 i === active
@@ -75,7 +74,7 @@ export default function Gallery({
                   : "opacity-70 hover:opacity-100"
               }`}
             >
-              <Image src={src} alt="" fill sizes="80px" className="object-cover" />
+              <Image src={src} alt={`הצגת תמונה ${i + 1}: ${alt}`} fill sizes="80px" className="object-cover" />
             </button>
           ))}
         </div>

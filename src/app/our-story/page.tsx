@@ -3,7 +3,7 @@ import BrandMark, { type BrandLogo } from "@/components/BrandMark";
 import LifestylePhoto from "@/components/LifestylePhoto";
 import ProductArt from "@/components/ProductArt";
 import { ButtonLink, Container, Eyebrow, PageHero } from "@/components/ui";
-import { getLifestyleImage } from "@/lib/lifestyle";
+import { getLifestyleAlt, getLifestyleImage } from "@/lib/lifestyle";
 
 export const metadata: Metadata = {
   title: "הסיפור שלנו",
@@ -60,6 +60,7 @@ export default function OurStoryPage() {
         intro="קראנו למותג על שם המתכת עצמה, כי בסוף הכול מתחיל ונגמר בה."
         emblem="element"
         image={getLifestyleImage("story")}
+        imageAlt={getLifestyleAlt("story")}
       />
 
       {/* Background */}
@@ -67,7 +68,7 @@ export default function OurStoryPage() {
         <Container className="grid items-center gap-14 lg:grid-cols-2">
           {storyPhoto ? (
             <div className="relative mx-auto aspect-[4/5] w-full max-w-md overflow-hidden rounded-[var(--radius-card)] bg-cream lg:max-w-none">
-              <LifestylePhoto src={storyPhoto} sizes="(min-width: 1024px) 50vw, 100vw" />
+              <LifestylePhoto src={storyPhoto} alt={getLifestyleAlt("story-2")} sizes="(min-width: 1024px) 50vw, 100vw" />
             </div>
           ) : (
             <div className="flex items-end justify-center gap-2 rounded-[var(--radius-card)] bg-cream py-14">

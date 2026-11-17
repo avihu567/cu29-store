@@ -1,20 +1,20 @@
 import Image from "next/image";
 
 /**
- * A lifestyle photo that fills its (relative, sized) parent. Decorative by
- * default; pass `alt` when the image carries meaning. A warm tint keeps
+ * A lifestyle photo that fills its (relative, sized) parent. `alt` is
+ * required: use getLifestyleAlt(slot) for a Hebrew description. A warm tint keeps
  * mismatched photos in the brand's palette.
  */
 export default function LifestylePhoto({
   src,
-  alt = "",
+  alt,
   sizes,
   priority = false,
   className = "",
   tint = true,
 }: {
   src: string;
-  alt?: string;
+  alt: string;
   sizes: string;
   priority?: boolean;
   className?: string;

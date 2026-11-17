@@ -92,12 +92,15 @@ export function PageHero({
   intro,
   emblem,
   image,
+  imageAlt = "",
 }: {
   eyebrow: string;
   title: ReactNode;
   intro?: ReactNode;
   emblem?: BrandLogo;
   image?: string;
+  /** Hebrew alt text for `image`. */
+  imageAlt?: string;
 }) {
   if (image) {
     return (
@@ -112,7 +115,7 @@ export function PageHero({
               {intro && <p className="text-subtle mt-8 max-w-xl text-lg leading-9 text-ink/75">{intro}</p>}
             </div>
             <div className="relative order-1 aspect-[16/10] overflow-hidden rounded-[var(--radius-card)] bg-sand shadow-[0_30px_60px_-40px_rgba(91,63,44,0.6)] lg:order-2 lg:aspect-[4/5] lg:max-h-[34rem]">
-              <LifestylePhoto src={image} sizes="(min-width: 1024px) 45vw, 100vw" priority />
+              <LifestylePhoto src={image} alt={imageAlt} sizes="(min-width: 1024px) 45vw, 100vw" priority />
               {emblem && (
                 <BrandMark logo={emblem} decorative className="absolute bottom-5 start-5 h-16 text-paper/90 drop-shadow" />
               )}

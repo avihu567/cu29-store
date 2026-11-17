@@ -67,14 +67,27 @@ function listPhotos(): string[] {
   }
 }
 
-/** Public URL of the photo for a slot, or undefined to use the fallback design. */
-export function getLifestyleImage(slot: LifestyleSlot): string | undefined {
+/**
+ * Hebrew alt text per photo file, so a photo has the same description
+ * wherever it appears. Add a line here when you add a new photo.
+ */
+const PHOTO_ALT: Record<string, string> = {
+  "image1 (3).jpeg": "בקבוק נחושת CU29 עם מכסה פתוח ליד חלון, לצד כוס קרמיקה ומפית פשתן",
+  "image2 (1).jpeg": "מזיגת מים מבקבוק נחושת CU29 לכוס נחושת, לצד קערת תאנים",
+  "image3 (1).jpeg": "מיכל מים מנחושת עם ברז על מעמד, במטבח מואר",
+  "image5 (1).jpeg": "גוש נחושת טבעית גולמית עם מינרלים ירוקים",
+  "image6.jpeg": "בקבוק נחושת CU29 מונח בחול החוף באור שקיעה",
+};
+const DEFAULT_ALT = "תמונת אווירה של CU29 – כלי נחושת טהורה";
+
+/** File name of the photo for a slot (see the rules at the top of this file). */
+function resolvePhoto(slot: LifestyleSlot): string | undefined {
   const photos = listPhotos();
   const pinned = photos.find((f) => baseName(f) === slot);
-  if (pinned) return toUrl(pinned);
+  if (pinned) return pinned;
 
   const assigned = ASSIGNMENTS[slot];
-  if (assigned && photos.includes(assigned)) return toUrl(assigned);
+  if (assigned && photos.includes(assigned)) return assigned;
 
   // Unassigned, unnamed photos fill the slots that are still empty.
   const used = new Set(Object.values(ASSIGNMENTS));
@@ -85,5 +98,17 @@ export function getLifestyleImage(slot: LifestyleSlot): string | undefined {
       !(ASSIGNMENTS[s] && photos.includes(ASSIGNMENTS[s]!)),
   );
   const i = openSlots.indexOf(slot);
-  return i >= 0 && i < pool.length ? toUrl(pool[i]) : undefined;
+  return i >= 0 && i < pool.length ? pool[i] : undefined;
+}
+
+/** Public URL of the photo for a slot, or undefined to use the fallback design. */
+export function getLifestyleImage(slot: LifestyleSlot): string | undefined {
+  const file = resolvePhoto(slot);
+  return file ? toUrl(file) : undefined;
+}
+
+/** Hebrew alt text for the photo shown in a slot. */
+export function getLifestyleAlt(slot: LifestyleSlot): string {
+  const file = resolvePhoto(slot);
+  return (file && PHOTO_ALT[file]) || DEFAULT_ALT;
 }

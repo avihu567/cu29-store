@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getLifestyleImage } from "@/lib/lifestyle";
+import { getLifestyleAlt, getLifestyleImage } from "@/lib/lifestyle";
 import LifestylePhoto from "../LifestylePhoto";
 
 const moments = [
@@ -49,7 +49,7 @@ export default function RitualStory() {
         <div className="self-center">
         {photo && (
           <div className="relative mx-auto mb-8 aspect-[5/4] w-full max-w-xl overflow-hidden rounded-3xl bg-tobacco lg:max-w-none">
-            <LifestylePhoto src={photo} sizes="(min-width: 1024px) 40vw, 100vw" />
+            <LifestylePhoto src={photo} alt={getLifestyleAlt("trust")} sizes="(min-width: 1024px) 40vw, 100vw" />
           </div>
         )}
         <ol className={`relative border-s border-ivory/15 ${photo ? "grid grid-cols-3 border-s-0 border-t pt-2" : ""}`}>

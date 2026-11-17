@@ -6,7 +6,7 @@ import ProductArt from "@/components/ProductArt";
 import ProductCard from "@/components/ProductCard";
 import Reviews from "@/components/Reviews";
 import { ButtonLink, Container, Eyebrow, SectionHeading } from "@/components/ui";
-import { getLifestyleImage } from "@/lib/lifestyle";
+import { getLifestyleAlt, getLifestyleImage } from "@/lib/lifestyle";
 import { products } from "@/lib/products";
 
 const pillars = [
@@ -72,7 +72,7 @@ export default function Home() {
               {heroPhoto ? (
                 <LifestylePhoto
                   src={heroPhoto}
-                  alt="בקבוק נחושת CU29 ליד חלון, באור בוקר רך"
+                  alt={getLifestyleAlt("hero")}
                   sizes="(min-width: 1024px) 45vw, 90vw"
                   priority
                   tint={false}
@@ -86,7 +86,7 @@ export default function Home() {
 
             {heroDetailPhoto && (
               <div className="absolute -bottom-10 -start-4 aspect-square w-36 overflow-hidden rounded-[1.75rem] border-[6px] border-white shadow-[var(--shadow-lift)] sm:-start-10 sm:w-48">
-                <LifestylePhoto src={heroDetailPhoto} sizes="12rem" tint={false} />
+                <LifestylePhoto src={heroDetailPhoto} alt={getLifestyleAlt("hero-2")} sizes="12rem" tint={false} />
               </div>
             )}
 
@@ -100,7 +100,7 @@ export default function Home() {
           <div className="relative flex justify-center">
             <div className="relative flex aspect-square w-full max-w-md items-center justify-center overflow-hidden rounded-full bg-cream">
               {philosophyPhoto ? (
-                <LifestylePhoto src={philosophyPhoto} sizes="(min-width: 1024px) 28rem, 90vw" />
+                <LifestylePhoto src={philosophyPhoto} alt={getLifestyleAlt("philosophy")} sizes="(min-width: 1024px) 28rem, 90vw" />
               ) : (
                 <BrandMark logo="element" decorative className="h-1/2 text-tobacco/80" />
               )}
@@ -152,7 +152,7 @@ export default function Home() {
         <div className="relative isolate overflow-hidden rounded-[2rem] bg-tobacco-deep text-ivory sm:rounded-[2.75rem]">
           {bannerPhoto && (
             <div className="absolute inset-0 -z-10">
-              <LifestylePhoto src={bannerPhoto} sizes="100vw" tint={false} />
+              <LifestylePhoto src={bannerPhoto} alt={getLifestyleAlt("banner")} sizes="100vw" tint={false} />
               <div className="absolute inset-0 bg-gradient-to-l from-tobacco-deep via-tobacco-deep/85 to-tobacco-deep/40" />
             </div>
           )}

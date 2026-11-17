@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import ProductCard from "@/components/ProductCard";
 import { Container, PageHero } from "@/components/ui";
-import { getLifestyleImage } from "@/lib/lifestyle";
+import { getLifestyleAlt, getLifestyleImage } from "@/lib/lifestyle";
 import { categories, products } from "@/lib/products";
 
 export const metadata: Metadata = {
@@ -17,6 +17,7 @@ export default function ShopPage() {
         title="הקולקציה המלאה"
         emblem="seal"
         image={getLifestyleImage("shop")}
+        imageAlt={getLifestyleAlt("shop")}
         intro="כל פריט מיוצר מנחושת טהורה 99.9%, ללא ציפויים וללא סגסוגות. בחרו את הכלי שילווה את הטקס שלכם."
       />
 

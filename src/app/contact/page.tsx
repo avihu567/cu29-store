@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import ContactForm from "@/components/ContactForm";
 import { WhatsAppIcon } from "@/components/icons";
 import { Container, PageHero } from "@/components/ui";
@@ -16,11 +17,13 @@ const faqs = [
   },
   {
     q: "כמה זמן לוקח משלוח?",
-    a: "משלוחים יוצאים תוך 1–2 ימי עסקים ומגיעים תוך 3–5 ימי עסקים לכל הארץ. משלוח חינם בהזמנה מעל ₪250.",
+    a: "זמן האספקה הוא עד 5 ימי עסקים לכל רחבי הארץ. עלות משלוח 30 ₪, ומשלוח חינם בהזמנה בסך 250 ₪ ומעלה. כל הפרטים בעמוד המשלוחים.",
+    href: "/shipping",
   },
   {
     q: "אפשר להחזיר מוצר?",
-    a: "כן, ניתן להחזיר מוצר שלא נעשה בו שימוש תוך 14 יום מקבלתו.",
+    a: "כן. ניתן להחליף מוצר תוך 14 ימי עסקים מיום קבלתו, ולבטל עסקה עד 14 ימים מיום קבלת המוצר, בתנאים המפורטים במדיניות ההחלפות, הביטולים וההחזרות.",
+    href: "/returns",
   },
 ];
 
@@ -72,7 +75,14 @@ export default function ContactPage() {
                     {f.q}
                     <span className="text-copper transition-transform group-open:rotate-45">+</span>
                   </summary>
-                  <p className="mt-3 text-sm leading-7 text-stone">{f.a}</p>
+                  <p className="mt-3 text-sm leading-7 text-stone">
+                    {f.a}
+                    {f.href && (
+                      <Link href={f.href} className="ms-1 text-copper-deep underline underline-offset-4">
+                        למדיניות המלאה ←
+                      </Link>
+                    )}
+                  </p>
                 </details>
               ))}
             </div>

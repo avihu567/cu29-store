@@ -15,8 +15,11 @@ import { WhatsAppIcon } from "../icons";
 import QuantitySelector from "../QuantitySelector";
 import Gallery from "./Gallery";
 import StarRating from "./StarRating";
-
-export const FREE_SHIPPING_FROM = 250;
+import {
+  DELIVERY_BUSINESS_DAYS,
+  EXCHANGE_BUSINESS_DAYS,
+  FREE_SHIPPING_THRESHOLD,
+} from "@/lib/shipping";
 
 interface Props {
   /** Size variants of the product family (or just the product itself). */
@@ -238,18 +241,20 @@ export default function ProductHero({
             )}
           </div>
 
-          <ul className="mt-8 grid grid-cols-3 gap-2 text-center text-xs text-stone">
-            {[
-              ["משלוח חינם", `מעל ₪${FREE_SHIPPING_FROM}`],
-              ["החזרה קלה", "תוך 14 יום"],
-              ["אחריות", "שנה מלאה"],
-            ].map(([a, b]) => (
-              <li key={a} className="rounded-2xl bg-cream/80 px-2 py-4 ring-1 ring-line/60">
-                <span className="block text-ink">{a}</span>
-                {b}
-              </li>
-            ))}
-          </ul>
+          {/* Shipping & exchange summary, linked to the full policies */}
+          <p className="mt-6 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-2xl bg-cream/70 px-4 py-3 text-center text-xs text-stone ring-1 ring-line/60">
+            <Link href="/shipping" className="underline-offset-4 hover:text-copper-deep hover:underline">
+              משלוח עד {DELIVERY_BUSINESS_DAYS} ימי עסקים
+            </Link>
+            <span aria-hidden="true">·</span>
+            <Link href="/shipping" className="underline-offset-4 hover:text-copper-deep hover:underline">
+              משלוח חינם מעל ₪{FREE_SHIPPING_THRESHOLD}
+            </Link>
+            <span aria-hidden="true">·</span>
+            <Link href="/returns" className="underline-offset-4 hover:text-copper-deep hover:underline">
+              החלפה עד {EXCHANGE_BUSINESS_DAYS} ימי עסקים
+            </Link>
+          </p>
 
           <div className="mt-8 divide-y divide-line/70 rounded-[var(--radius-card)] bg-paper/70 px-6 ring-1 ring-line/60">
             <Accordion title="על המוצר" defaultOpen>

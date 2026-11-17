@@ -5,7 +5,7 @@ import LifestylePhoto from "@/components/LifestylePhoto";
 import ProductArt from "@/components/ProductArt";
 import { ButtonLink, Container, Eyebrow } from "@/components/ui";
 import { braceletUsage, careSteps, vesselUsage } from "@/lib/care";
-import { getLifestyleImage } from "@/lib/lifestyle";
+import { getLifestyleAlt, getLifestyleImage } from "@/lib/lifestyle";
 
 export const metadata: Metadata = {
   title: "הטקס",
@@ -119,7 +119,7 @@ export default function RitualPage() {
             {coverPhoto ? (
               <div className="relative mx-auto w-full max-w-md lg:max-w-none">
                 <div className="relative aspect-[4/5] overflow-hidden rounded-t-full rounded-b-[var(--radius-card)] bg-cream">
-                  <LifestylePhoto src={coverPhoto} sizes="(min-width: 1024px) 40vw, 100vw" priority />
+                  <LifestylePhoto src={coverPhoto} alt={getLifestyleAlt("ritual")} sizes="(min-width: 1024px) 40vw, 100vw" priority />
                 </div>
                 <span className="absolute -bottom-8 start-6 flex h-32 w-32 items-center justify-center rounded-full bg-ivory shadow-[0_18px_40px_-18px_rgba(91,63,44,0.55)]">
                   <BrandMark logo="seal" decorative className="h-24 animate-slow-spin text-copper-deep" />
@@ -181,7 +181,7 @@ export default function RitualPage() {
           <aside className={`space-y-5 ${ayurvedaPhoto ? "lg:pt-6" : "lg:pt-40"}`}>
             {ayurvedaPhoto && (
               <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-card)] bg-cream">
-                <LifestylePhoto src={ayurvedaPhoto} sizes="(min-width: 1024px) 35vw, 100vw" />
+                <LifestylePhoto src={ayurvedaPhoto} alt={getLifestyleAlt("ritual-2")} sizes="(min-width: 1024px) 35vw, 100vw" />
               </div>
             )}
             <blockquote className="rounded-[var(--radius-card)] bg-cream p-9 font-serif text-2xl font-light leading-[1.5] text-ink">
@@ -307,7 +307,7 @@ export default function RitualPage() {
               <div className="space-y-5 self-center">
               {carePhoto && (
                 <div className="relative aspect-[16/9] overflow-hidden rounded-[2rem] bg-sand">
-                  <LifestylePhoto src={carePhoto} sizes="(min-width: 1024px) 45vw, 100vw" />
+                  <LifestylePhoto src={carePhoto} alt={getLifestyleAlt("ritual-3")} sizes="(min-width: 1024px) 45vw, 100vw" />
                 </div>
               )}
               <div className="rounded-[2rem] bg-paper p-8 shadow-[0_30px_60px_-40px_rgba(91,63,44,0.6)] sm:p-10">

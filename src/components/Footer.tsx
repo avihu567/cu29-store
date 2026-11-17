@@ -2,6 +2,7 @@ import Link from "next/link";
 import BrandMark from "./BrandMark";
 import Logo from "./Logo";
 import OrganicDivider from "./OrganicDivider";
+import { POLICY_LINKS } from "./legal/LegalPage";
 import { WHATSAPP_DISPLAY, categories, whatsappLink } from "@/lib/products";
 
 const columns = [
@@ -26,6 +27,10 @@ const columns = [
       { href: "/cart", label: "סל קניות" },
     ],
   },
+  {
+    title: "מידע ומדיניות",
+    links: POLICY_LINKS,
+  },
 ];
 
 export default function Footer() {
@@ -38,7 +43,7 @@ export default function Footer() {
         <BrandMark logo="seal" decorative className="h-28 animate-slow-spin text-copper-light/80" />
       </div>
       <OrganicDivider light className="mx-auto max-w-7xl px-5" />
-      <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-8 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:px-10">
+      <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-8 md:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1.15fr] lg:px-10">
         <div className="space-y-5">
           <Logo light size="lg" />
           <p className="max-w-xs text-sm leading-7">
@@ -75,9 +80,8 @@ export default function Footer() {
         ))}
       </div>
       <div className="border-t border-ivory/10">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-5 py-6 text-xs text-ivory/40 sm:flex-row sm:px-8 lg:px-10">
-          <span>© CU29. כל הזכויות שמורות.</span>
-          <span dir="ltr">Pure Flow. Pure Metal.</span>
+        <div className="mx-auto max-w-7xl px-5 py-6 text-center text-xs text-ivory/45 sm:px-8 lg:px-10">
+          <p>© CU29. כל הזכויות שמורות.</p>
         </div>
       </div>
     </footer>
