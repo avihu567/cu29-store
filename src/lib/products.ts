@@ -21,14 +21,15 @@ export type RingColorId = "charcoal" | "terracotta";
 export interface RingColor {
   id: RingColorId;
   name: string;
+  /** Internal reference for production only — never shown on the site. */
   pantone: string;
-  /** Screen approximation of the Pantone swatch. */
+  /** Screen approximation of the swatch. */
   hex: string;
 }
 
 export const RING_COLORS: Record<RingColorId, RingColor> = {
   charcoal: { id: "charcoal", name: "פחם", pantone: "Pantone 426 C", hex: "#25282A" },
-  terracotta: { id: "terracotta", name: "טרקוטה", pantone: "Pantone 7516 C", hex: "#9A3A06" },
+  terracotta: { id: "terracotta", name: "ורוד עתיק", pantone: "Pantone 7516 C", hex: "#9A3A06" },
 };
 
 export interface Product {
@@ -128,7 +129,7 @@ export const categories: Category[] = [
 
 const PURE_COPPER = { label: "חומר", value: "99.9% נחושת טהורה" };
 const NO_LINING = { label: "ציפוי פנימי", value: "ללא, מגע ישיר עם הנחושת" };
-const RING_SPEC = { label: "טבעת סיליקון", value: "פחם (Pantone 426 C) או טרקוטה (Pantone 7516 C)" };
+const RING_SPEC = { label: "טבעת סיליקון", value: "פחם או ורוד עתיק" };
 const BOTTLE_FAMILY = {
   title: "בקבוק נחושת טהורה",
   titleEn: "The Pure Metal Bottle",

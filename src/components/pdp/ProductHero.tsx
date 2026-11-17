@@ -167,7 +167,6 @@ export default function ProductHero({
             <fieldset className="mt-7">
               <legend className="mb-3 text-sm text-stone">
                 צבע טבעת סיליקון: <span className="text-ink">{ring.name}</span>
-                <span className="ms-2 text-xs text-stone" dir="ltr">{ring.pantone}</span>
               </legend>
               <div className="flex gap-3">
                 {product.ringColors.map((id) => {
@@ -179,8 +178,8 @@ export default function ProductHero({
                       type="button"
                       onClick={() => setColor(id)}
                       aria-pressed={active}
-                      aria-label={`${c.name} (${c.pantone})`}
-                      title={`${c.name} · ${c.pantone}`}
+                      aria-label={c.name}
+                      title={c.name}
                       className={`flex h-11 w-11 items-center justify-center rounded-full border transition ${
                         active ? "border-ink" : "border-transparent hover:border-stone-muted"
                       }`}
