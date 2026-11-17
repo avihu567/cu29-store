@@ -32,6 +32,18 @@ export const RING_COLORS: Record<RingColorId, RingColor> = {
   terracotta: { id: "terracotta", name: "ורוד עתיק", pantone: "Pantone 7516 C", hex: "#9A3A06" },
 };
 
+export interface ProductDimensions {
+  volumeMl: number;
+  heightCm: number;
+  diameterCm: number;
+}
+
+/** A spec line; rows without a value (e.g. "עבודת יד") render on their own. */
+export interface SpecRow {
+  label: string;
+  value?: string;
+}
+
 export interface GalleryImage {
   /** Public path, e.g. /products/bottles-500ml/cu29-copper-bottle-500ml-1.jpg */
   src: string;
@@ -69,8 +81,13 @@ export interface Product {
   featured?: boolean;
   shortDescription: string;
   description: string[];
-  // TODO(specs): extend with full technical specifications when provided.
-  specs: { label: string; value: string }[];
+  /**
+   * Physical dimensions — the single place to edit them. The spec block,
+   * the "מפרט טכני" accordion and the schema.org data are generated from it.
+   */
+  dimensions?: ProductDimensions;
+  /** Additional spec rows (shown after the generated dimension rows). */
+  specs: SpecRow[];
 }
 
 export const WHATSAPP_NUMBER = "972508898101";
@@ -188,7 +205,8 @@ export const products: Product[] = [
     art: "bottle-small",
     shortDescription: "המידה הקטנה והקלה, שנכנסת לכל תיק.",
     description: bottleDescription,
-    specs: [PURE_COPPER, { label: "נפח", value: "500 מ״ל" }, NO_LINING, RING_SPEC],
+    dimensions: { volumeMl: 500, heightCm: 18, diameterCm: 7 },
+    specs: [NO_LINING, RING_SPEC],
   },
   {
     slug: "copper-bottle-700ml",
@@ -205,7 +223,8 @@ export const products: Product[] = [
     featured: true,
     shortDescription: "איזון מושלם בין נפח לנוחות, לבית, למשרד ולחדר הכושר.",
     description: bottleDescription,
-    specs: [PURE_COPPER, { label: "נפח", value: "700 מ״ל" }, NO_LINING, RING_SPEC],
+    dimensions: { volumeMl: 700, heightCm: 22, diameterCm: 6.5 },
+    specs: [NO_LINING, RING_SPEC],
   },
   {
     slug: "copper-bottle-950ml",
@@ -224,7 +243,8 @@ export const products: Product[] = [
     shortDescription:
       "הבקבוק שהתחיל הכול. נחושת טהורה 99.9%, נפח מלא לכל היום.",
     description: bottleDescription,
-    specs: [PURE_COPPER, { label: "נפח", value: "950 מ״ל" }, NO_LINING, RING_SPEC],
+    dimensions: { volumeMl: 950, heightCm: 26, diameterCm: 7 },
+    specs: [NO_LINING, RING_SPEC],
   },
   {
     slug: "copper-water-vessel-4l",
@@ -291,4 +311,22 @@ export function getCategory(id: CategoryId): Category {
 export function getSizeVariants(product: Product): Product[] {
   if (!product.sizeGroup) return [];
   return products.filter((p) => p.sizeGroup === product.sizeGroup);
+}
+
+/** The core spec rows ("מפרט") generated from the product dimensions. */
+export function dimensionSpecs(product: Product): SpecRow[] {
+  const d = product.dimensions;
+  if (!d) return [];
+  return [
+    { label: "נפח", value: `${d.volumeMl} מ״ל` },
+    { label: "גובה", value: `${d.heightCm} ס״מ` },
+    { label: "קוטר", value: `${d.diameterCm} ס״מ` },
+    { label: "חומר", value: "נחושת טהורה 99.9%" },
+    { label: "עבודת יד" },
+  ];
+}
+
+/** Full technical spec list for the "מפרט טכני" accordion. */
+export function technicalSpecs(product: Product): SpecRow[] {
+  return [...dimensionSpecs(product), ...product.specs];
 }

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { addToCart } from "@/lib/cart";
 import {
   RING_COLORS,
+  technicalSpecs,
   formatPrice,
   orderMessage,
   whatsappLink,
@@ -18,7 +19,6 @@ import Gallery from "./Gallery";
 import StarRating from "./StarRating";
 import {
   DELIVERY_BUSINESS_DAYS,
-  EXCHANGE_BUSINESS_DAYS,
   FREE_SHIPPING_THRESHOLD,
 } from "@/lib/shipping";
 
@@ -242,7 +242,7 @@ export default function ProductHero({
             )}
           </div>
 
-          {/* Shipping & exchange summary, linked to the full policies */}
+          {/* Shipping summary, linked to the shipping policy */}
           <p className="mt-6 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-2xl bg-cream/70 px-4 py-3 text-center text-xs text-stone ring-1 ring-line/60">
             <Link href="/shipping" className="underline-offset-4 hover:text-copper-deep hover:underline">
               משלוח עד {DELIVERY_BUSINESS_DAYS} ימי עסקים
@@ -250,10 +250,6 @@ export default function ProductHero({
             <span aria-hidden="true">·</span>
             <Link href="/shipping" className="underline-offset-4 hover:text-copper-deep hover:underline">
               משלוח חינם מעל ₪{FREE_SHIPPING_THRESHOLD}
-            </Link>
-            <span aria-hidden="true">·</span>
-            <Link href="/returns" className="underline-offset-4 hover:text-copper-deep hover:underline">
-              החלפה עד {EXCHANGE_BUSINESS_DAYS} ימי עסקים
             </Link>
           </p>
 
@@ -267,12 +263,18 @@ export default function ProductHero({
             </Accordion>
             <Accordion title="מפרט טכני">
               <dl className="grid grid-cols-[auto_1fr] gap-x-8 gap-y-2.5">
-                {product.specs.map((s) => (
-                  <div key={s.label} className="contents">
-                    <dt className="text-stone">{s.label}</dt>
-                    <dd className="text-ink">{s.value}</dd>
-                  </div>
-                ))}
+                {technicalSpecs(product).map((s) =>
+                  s.value ? (
+                    <div key={s.label} className="contents">
+                      <dt className="text-stone">{s.label}</dt>
+                      <dd className="text-ink">{s.value}</dd>
+                    </div>
+                  ) : (
+                    <div key={s.label} className="col-span-2">
+                      <dt className="text-ink">{s.label}</dt>
+                    </div>
+                  ),
+                )}
               </dl>
             </Accordion>
           </div>

@@ -12,6 +12,7 @@ import RitualStory from "@/components/pdp/RitualStory";
 import { getGallery } from "@/lib/product-images";
 import { getCategory, getProduct, getSizeVariants, products } from "@/lib/products";
 import { ratingSummary, reviewsFor } from "@/lib/reviews";
+import { jsonLdString, productJsonLd } from "@/lib/structured-data";
 
 export function generateStaticParams() {
   return products.map((p) => ({ slug: p.slug }));
@@ -71,6 +72,11 @@ async function ProductContent({ params }: { params: Promise<{ slug: string }> })
 
   return (
     <>
+      {/* schema.org Product (SEO) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdString(productJsonLd(product, imagesBySlug[product.slug] ?? [])) }}
+      />
       <nav aria-label="פירורי לחם" className="mx-auto flex max-w-7xl gap-2 px-4 pt-6 text-xs text-stone sm:px-6 lg:px-8">
         <Link href="/" className="hover:text-copper">דף הבית</Link>
         <span>/</span>
