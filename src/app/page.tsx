@@ -129,8 +129,26 @@ export default function Home() {
         </Container>
       </section>
 
+      {/* ───────── Featured products ───────── */}
+      <section className="pb-28 sm:pb-40">
+        <Container>
+          <OrganicDivider className="mb-20 sm:mb-28" />
+          <div className="mb-14 flex flex-wrap items-end justify-between gap-6">
+            <SectionHeading eyebrow="נבחרים" title="האהובים ביותר" />
+            <Link href="/shop" className="text-sm text-copper-deep underline-offset-8 hover:underline">
+              לכל המוצרים ←
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-6 lg:grid-cols-4">
+            {featured.map((p) => (
+              <ProductCard key={p.slug} product={p} />
+            ))}
+          </div>
+        </Container>
+      </section>
+
       {/* ───────── Ritual teaser ───────── */}
-      <section className="px-3 sm:px-5">
+      <section className="mb-28 px-3 sm:mb-40 sm:px-5">
         <div className="relative isolate overflow-hidden rounded-[2rem] bg-tobacco-deep text-ivory sm:rounded-[2.75rem]">
           {bannerPhoto && (
             <div className="absolute inset-0 -z-10">
@@ -169,24 +187,6 @@ export default function Home() {
             </ol>
           </Container>
         </div>
-      </section>
-
-      {/* ───────── Featured products ───────── */}
-      <section className="py-28 sm:py-40">
-        <Container>
-          <OrganicDivider className="mb-20 sm:mb-28" />
-          <div className="mb-14 flex flex-wrap items-end justify-between gap-6">
-            <SectionHeading eyebrow="נבחרים" title="המומלצים ביותר" />
-            <Link href="/shop" className="text-sm text-copper-deep underline-offset-8 hover:underline">
-              לכל המוצרים ←
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-6 lg:grid-cols-4">
-            {featured.map((p) => (
-              <ProductCard key={p.slug} product={p} />
-            ))}
-          </div>
-        </Container>
       </section>
 
       <Reviews />
