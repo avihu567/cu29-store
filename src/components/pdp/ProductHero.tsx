@@ -396,7 +396,7 @@ export default function ProductHero({
                 </a>
               </>
             ) : (
-              <NotifyForm productName={product.name} />
+              <NotifyForm productName={product.name} productSlug={product.slug} />
             )}
 
             {added && (

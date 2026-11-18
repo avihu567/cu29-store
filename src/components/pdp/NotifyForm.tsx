@@ -9,25 +9,41 @@ const PHONE = /^(\+972|0)[\d\s-]{8,12}$/;
 
 /**
  * "Notify me at launch" form for coming-soon products.
- *
- * There is no mailing backend yet, so the signup is handed to CU29 via a
- * pre-filled WhatsApp message (the same channel as orders and the contact
- * form). To collect signups automatically, replace `submit` with a call to
- * a mailing service or a Server Action.
+ * Saves the signup to the Supabase waitlist (POST /api/waitlist). If the
+ * database isn't reachable, it falls back to a pre-filled WhatsApp message
+ * so no lead is lost.
  */
-export default function NotifyForm({ productName }: { productName: string }) {
+export default function NotifyForm({ productName, productSlug }: { productName: string; productSlug: string }) {
   const [value, setValue] = useState("");
   const [error, setError] = useState(false);
   const [done, setDone] = useState(false);
+  const [sending, setSending] = useState(false);
   const inputId = useId();
   const errorId = useId();
 
-  function submit(e: React.FormEvent<HTMLFormElement>) {
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (sending) return;
     const contact = value.trim();
     if (!EMAIL.test(contact) && !PHONE.test(contact)) {
       setError(true);
       return;
+    }
+    setSending(true);
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productSlug, contact }),
+      });
+      if (res.ok) {
+        setDone(true);
+        return;
+      }
+    } catch {
+      // fall through to WhatsApp
+    } finally {
+      setSending(false);
     }
     window.open(
       whatsappLink(
@@ -78,7 +94,11 @@ export default function NotifyForm({ productName }: { productName: string }) {
             error ? "border-red-600" : "border-line"
           }`}
         />
-        <button type="submit" className="btn-copper shrink-0 rounded-full px-7 py-3 text-sm tracking-[0.06em]">
+        <button
+          type="submit"
+          disabled={sending}
+          className="btn-copper shrink-0 rounded-full px-7 py-3 text-sm tracking-[0.06em] disabled:opacity-70"
+        >
           עדכנו אותי
         </button>
       </div>
@@ -87,7 +107,6 @@ export default function NotifyForm({ productName }: { productName: string }) {
           נא להזין כתובת מייל או מספר טלפון תקינים.
         </p>
       )}
-      <p className="mt-3 ps-2 text-xs text-stone/80">הפרטים יישלחו אלינו בהודעת וואטסאפ.</p>
     </form>
   );
 }

@@ -17,7 +17,8 @@ export default function PixelRouteTracker() {
       first.current = false;
       return;
     }
-    pageView();
+    // The private admin dashboard is never tracked.
+    if (!pathname.startsWith("/admin")) pageView();
   }, [pathname]);
 
   return null;

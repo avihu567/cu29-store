@@ -32,11 +32,13 @@ export default function ShippingForm({
   errors,
   onChange,
   onSubmit,
+  submitting = false,
 }: {
   values: ShippingDetails;
   errors: ShippingErrors;
   onChange: (name: ShippingField, value: string) => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  submitting?: boolean;
 }) {
   return (
     <form noValidate onSubmit={onSubmit} className="space-y-6">
@@ -91,10 +93,12 @@ export default function ShippingForm({
 
       <button
         type="submit"
-        className="btn-copper flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-sm tracking-[0.08em]"
+        disabled={submitting}
+        aria-busy={submitting || undefined}
+        className="btn-copper flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-sm tracking-[0.08em] disabled:opacity-70"
       >
-        המשך לבחירת אמצעי תשלום
-        <span aria-hidden="true">←</span>
+        {submitting ? "שומרים את הפרטים…" : "המשך לבחירת אמצעי תשלום"}
+        {!submitting && <span aria-hidden="true">←</span>}
       </button>
     </form>
   );

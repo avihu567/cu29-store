@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { clearCart, useCart, useGiftSleevePick } from "@/lib/cart";
+import { clearCart, useCart, useGiftSleevePick, type CartLine, type GiftSleevePick } from "@/lib/cart";
 import {
   cleanShipping,
   EMPTY_SHIPPING,
@@ -21,6 +21,35 @@ import PaymentStep from "./PaymentStep";
 import ShippingForm, { fieldId } from "./ShippingForm";
 
 type Step = "shipping" | "payment";
+
+/** The order saved in the database at step 1 (null when the DB isn't connected). */
+interface SavedOrder {
+  id: string;
+  token: string;
+  orderNumber: string;
+}
+
+/**
+ * Saves (or updates) the pending order. Never blocks the sale: on any failure
+ * it returns null and checkout continues with a local order reference.
+ */
+async function saveOrder(
+  existing: SavedOrder | null,
+  payload: { lines: CartLine[]; shipping: ShippingDetails; giftPick: GiftSleevePick },
+): Promise<SavedOrder | null> {
+  try {
+    const res = await fetch(existing ? `/api/orders/${existing.id}` : "/api/orders", {
+      method: existing ? "PATCH" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(existing ? { action: "update", token: existing.token, ...payload } : payload),
+    });
+    if (!res.ok) return existing && res.status === 409 ? null : existing;
+    const data = (await res.json()) as { id: string; orderNumber: string; token?: string };
+    return { id: data.id, orderNumber: data.orderNumber, token: data.token ?? existing?.token ?? "" };
+  } catch {
+    return existing;
+  }
+}
 
 function StepBadge({ n, done, active }: { n: number; done: boolean; active: boolean }) {
   return (
@@ -42,8 +71,10 @@ export default function CheckoutView({
   images: Record<string, string | undefined>;
   hypEnabled: boolean;
 }) {
-  const cart = priceCart(useCart());
-  const gift = resolveGiftSleeve(cart, useGiftSleevePick());
+  const cartLines = useCart();
+  const giftPick = useGiftSleevePick();
+  const cart = priceCart(cartLines);
+  const gift = resolveGiftSleeve(cart, giftPick);
   const giftSleeve = gift?.active ? { size: gift.size, colorName: gift.colorName } : undefined;
 
   const [step, setStep] = useState<Step>("shipping");
@@ -51,6 +82,9 @@ export default function CheckoutView({
   const [errors, setErrors] = useState<ShippingErrors>({});
   const [orderRef, setOrderRef] = useState("");
   const [confirmed, setConfirmed] = useState<ConfirmedOrder | null>(null);
+  const [savedOrder, setSavedOrder] = useState<SavedOrder | null>(null);
+  const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
   const paymentRef = useRef<HTMLElement>(null);
 
   if (confirmed) return <OrderConfirmation order={confirmed} />;
@@ -74,8 +108,9 @@ export default function CheckoutView({
     }
   }
 
-  function continueToPayment(e: React.FormEvent<HTMLFormElement>) {
+  async function continueToPayment(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (savingRef.current) return;
     const found = validateShipping(shipping);
     setErrors(found);
     const first = (Object.keys(found) as ShippingField[])[0];
@@ -83,14 +118,43 @@ export default function CheckoutView({
       document.getElementById(fieldId(first))?.focus();
       return;
     }
-    setShipping(cleanShipping(shipping));
-    if (!orderRef) setOrderRef(newOrderRef());
+    const clean = cleanShipping(shipping);
+    setShipping(clean);
+
+    // Save the lead / pending order (abandoned-cart capture).
+    savingRef.current = true;
+    setSaving(true);
+    const saved = await saveOrder(savedOrder, {
+      lines: cartLines,
+      shipping: clean,
+      giftPick,
+    });
+    savingRef.current = false;
+    setSaving(false);
+    setSavedOrder(saved);
+    setOrderRef(saved?.orderNumber || orderRef || newOrderRef());
     setStep("payment");
     requestAnimationFrame(() => paymentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
   }
 
-  function handlePaid(order: { orderId: string; captureId?: string }) {
+  function handlePaid(order: { orderId: string; captureId?: string }, marketingOptIn: boolean) {
     fpixel.purchase({ contents: pixelContents(cart), value: cart.total, orderId: order.orderId });
+    // Mark the saved order paid + take stock (server-side, once). keepalive lets
+    // the request finish even if the customer closes the tab right away.
+    if (savedOrder) {
+      fetch(`/api/orders/${savedOrder.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+        body: JSON.stringify({
+          action: "paid",
+          token: savedOrder.token,
+          paypalOrderId: order.orderId,
+          paypalCaptureId: order.captureId,
+          marketingOptIn,
+        }),
+      }).catch((err) => console.error("[checkout] could not mark order paid", err));
+    }
     setConfirmed({ ...order, orderRef, shipping, cart, giftSleeve });
     clearCart();
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -141,7 +205,13 @@ export default function CheckoutView({
               {shipping.notes && <p>הערות לשליח: {shipping.notes}</p>}
             </address>
           ) : (
-            <ShippingForm values={shipping} errors={errors} onChange={updateField} onSubmit={continueToPayment} />
+            <ShippingForm
+              values={shipping}
+              errors={errors}
+              onChange={updateField}
+              onSubmit={continueToPayment}
+              submitting={saving}
+            />
           )}
         </section>
 
