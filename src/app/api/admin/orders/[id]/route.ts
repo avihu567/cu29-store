@@ -1,7 +1,8 @@
 // PATCH /api/admin/orders/[id] { status } → change an order's status (admin only)
-import type { NextRequest } from "next/server";
+import { after, type NextRequest } from "next/server";
+import { sendOrderConfirmation } from "@/lib/email/send-order-confirmation";
 import { isAdminRequest, unauthorized } from "@/lib/admin-auth";
-import { ORDER_ADMIN_COLUMNS, ORDER_STATUSES, type OrderStatus } from "@/lib/orders";
+import { ORDER_ADMIN_COLUMNS, ORDER_STATUSES, type OrderRow, type OrderStatus } from "@/lib/orders";
 import { DB_NOT_CONFIGURED, getSupabaseAdmin, serverError } from "@/lib/supabase-admin";
 
 const STAMP: Partial<Record<OrderStatus, string>> = {
@@ -24,6 +25,7 @@ async function handlePATCH(request: NextRequest, { params }: { params: Promise<{
   }
   if (!ORDER_STATUSES.includes(status as OrderStatus)) return Response.json({ error: "bad_status" }, { status: 400 });
 
+  const { data: before } = await db.from("orders").select("status").eq("id", id).maybeSingle();
   const now = new Date().toISOString();
   const stamp = STAMP[status as OrderStatus];
   const { data, error } = await db
@@ -33,6 +35,11 @@ async function handlePATCH(request: NextRequest, { params }: { params: Promise<{
     .select(ORDER_ADMIN_COLUMNS)
     .single();
   if (error || !data) return Response.json({ error: "db_error" }, { status: 500 });
+  // Marked paid by hand (e.g. bank transfer / WhatsApp order): send the same emails, once.
+  if (before?.status === "pending_payment" && status === "paid") {
+    const row = data as unknown as OrderRow;
+    after(() => sendOrderConfirmation(row).then((r) => console.log("[email]", row.order_number, r)));
+  }
   return Response.json({ order: data });
 }
 

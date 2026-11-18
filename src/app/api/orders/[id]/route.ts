@@ -5,6 +5,9 @@
 //       → status 'paid' + stock taken (atomic, once). With PAYPAL_CLIENT_SECRET
 //         set, PayPal is asked first; a wrong amount becomes 'payment_review'.
 import { createHash, timingSafeEqual } from "node:crypto";
+import { after } from "next/server";
+import { sendOrderConfirmation } from "@/lib/email/send-order-confirmation";
+import type { OrderRow } from "@/lib/orders";
 import { verifyPayPalOrder } from "@/lib/payments/paypal-server";
 import { DB_NOT_CONFIGURED, getSupabaseAdmin, serverError } from "@/lib/supabase-admin";
 import { buildOrderFields, type OrderDraftBody } from "@/lib/order-draft";
@@ -71,7 +74,12 @@ async function handlePATCH(request: Request, { params }: { params: Promise<{ id:
       console.error("[orders] mark paid failed", error);
       return Response.json({ error: "db_error" }, { status: 500 });
     }
-    const row = (Array.isArray(data) ? data[0] : data) as { status?: string; order_number?: string } | undefined;
+    const row = (Array.isArray(data) ? data[0] : data) as OrderRow | undefined;
+    // Emails only on the first transition to paid (not on browser retries).
+    // after(): sent once the response is out, so checkout never waits on email.
+    if (row && order.status === "pending_payment" && (row.status === "paid" || row.status === "payment_review")) {
+      after(() => sendOrderConfirmation(row).then((r) => console.log("[email]", row.order_number, r)));
+    }
     return Response.json({ status: row?.status, orderNumber: row?.order_number, verification: check });
   }
 
