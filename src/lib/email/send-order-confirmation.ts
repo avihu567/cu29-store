@@ -3,6 +3,7 @@
 // unverified sending domain, Resend outage…) is logged and the order flow
 // carries on untouched.
 import { Resend } from "resend";
+import { SUPPORT_EMAIL } from "../business";
 import { cleanEnv } from "../env";
 import type { OrderRow } from "../orders";
 import { adminEmail, customerEmail } from "./templates";
@@ -42,7 +43,8 @@ export async function sendOrderConfirmation(order: OrderRow): Promise<EmailResul
       resend.emails.send({
         from,
         to: order.email,
-        ...(adminTo && { replyTo: adminTo }),
+        // Customers reply to the public support address, never the private admin inbox.
+        replyTo: SUPPORT_EMAIL,
         subject: customer.subject,
         html: customer.html,
         text: customer.text,

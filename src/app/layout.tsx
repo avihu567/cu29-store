@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Rubik } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
+import AccessibilityWidget from "@/components/AccessibilityWidget";
 import MetaPixel from "@/components/analytics/MetaPixel";
 import "./globals.css";
 
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main className="flex-1">{children}</main>
         <Footer />
         <WhatsAppFloat />
+        <AccessibilityWidget />
         <MetaPixel />
       </body>
     </html>

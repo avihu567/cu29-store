@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { ShippingDetails } from "@/lib/checkout";
 import { lineOptions, type GiftSleeveChoice, type PricedCart } from "@/lib/pricing";
 import { formatPrice, whatsappLink } from "@/lib/products";
-import { DELIVERY_BUSINESS_DAYS } from "@/lib/shipping";
+import { DELIVERY_TIME } from "@/lib/shipping";
 import { WhatsAppIcon } from "../icons";
 
 export interface ConfirmedOrder {
@@ -72,7 +72,7 @@ export default function OrderConfirmation({ order }: { order: ConfirmedOrder }) 
             </p>
             {shipping.notes && <p>הערות לשליח: {shipping.notes}</p>}
           </address>
-          <p className="mt-4 text-xs text-copper-dark">זמן אספקה משוער: עד {DELIVERY_BUSINESS_DAYS} ימי עסקים</p>
+          <p className="mt-4 text-xs text-copper-dark">זמן אספקה משוער: {DELIVERY_TIME}</p>
         </section>
 
         <section className="rounded-[var(--radius-card)] bg-cream/60 p-6 ring-1 ring-line/60">

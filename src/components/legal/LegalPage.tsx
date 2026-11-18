@@ -4,9 +4,10 @@ import { Container, Eyebrow } from "../ui";
 
 /** Shared links between the policy pages. */
 export const POLICY_LINKS = [
-  { href: "/terms", label: "תקנון האתר" },
+  { href: "/terms", label: "תקנון ותנאי שימוש" },
+  { href: "/returns", label: "מדיניות החזרות וביטול עסקה" },
+  { href: "/cancel-order", label: "ביטול עסקה" },
   { href: "/shipping", label: "משלוחים" },
-  { href: "/returns", label: "החלפות, ביטולים והחזרות" },
   { href: "/privacy", label: "מדיניות פרטיות" },
   { href: "/accessibility", label: "הצהרת נגישות" },
 ];

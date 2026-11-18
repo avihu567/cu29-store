@@ -242,3 +242,54 @@ body {
     scroll-behavior: auto;
   }
 }
+
+/* ───────── Accessibility widget modes (set on <html> by AccessibilityWidget) ───────── */
+/* High contrast: darker text, white surfaces, stronger lines and copper */
+html.a11y-contrast {
+  --color-ink: #000000;
+  --color-stone: #1f1712;
+  --color-stone-muted: #5c4033;
+  --color-tobacco-deep: #000000;
+  --color-paper: #ffffff;
+  --color-cream: #ffffff;
+  --color-terra: #ffffff;
+  --color-sand: #e0d0c8;
+  --color-wood-light: #ffffff;
+  --color-line: #4a3226;
+  --color-copper: #7a4128;
+  --color-copper-deep: #6a361f;
+  --color-copper-dark: #5a2c18;
+  --color-copper-light: #f0c8b2;
+  --color-copper-pale: #ffffff;
+}
+html.a11y-contrast .btn-copper {
+  background-image: none;
+  background-color: #6a361f;
+}
+html.a11y-contrast .texture-stone,
+html.a11y-contrast .texture-clay,
+html.a11y-contrast .warm-glow {
+  background-image: none;
+}
+html.a11y-grayscale {
+  filter: grayscale(1);
+}
+html.a11y-links a {
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+  outline: 2px solid #b5785c;
+  outline-offset: 2px;
+}
+html.a11y-no-motion *,
+html.a11y-no-motion *::before,
+html.a11y-no-motion *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+/* Print never shows the widget */
+@media print {
+  .a11y-widget {
+    display: none !important;
+  }
+}

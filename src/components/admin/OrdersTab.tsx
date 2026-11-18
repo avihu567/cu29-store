@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ORDER_STATUSES, ORDER_STATUS_LABELS, waPhone, type OrderRow, type OrderStatus } from "@/lib/orders";
-import { DELIVERY_BUSINESS_DAYS } from "@/lib/shipping";
+import { DELIVERY_TIME } from "@/lib/shipping";
 import { WhatsAppIcon } from "../icons";
 import { ApiError, api, errorText, formatDate, ils } from "./api";
 
@@ -35,7 +35,7 @@ function whatsappMessage(o: OrderRow): string {
     case "payment_review":
       return `היי ${o.first_name}, תודה על ההזמנה ${o.order_number} ב-CU29!\nההזמנה התקבלה ונמצאת בהכנה. נעדכן ברגע שהיא יוצאת למשלוח.`;
     case "shipped":
-      return `היי ${o.first_name}, ההזמנה ${o.order_number} מ-CU29 יצאה למשלוח 📦\nכתובת: ${o.address}, ${o.city}\nזמן אספקה משוער: עד ${DELIVERY_BUSINESS_DAYS} ימי עסקים.`;
+      return `היי ${o.first_name}, ההזמנה ${o.order_number} מ-CU29 יצאה למשלוח 📦\nכתובת: ${o.address}, ${o.city}\nזמן אספקה משוער: ${DELIVERY_TIME}.`;
     case "delivered":
       return `היי ${o.first_name}, מקווים שהטקס עם הנחושת כבר מתחיל 🌿\nנשמח לשמוע איך היה, ותודה שבחרת ב-CU29.`;
     default:

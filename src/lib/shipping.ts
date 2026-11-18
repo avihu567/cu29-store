@@ -7,7 +7,9 @@ export const SHIPPING_FEE = 30;
 export const FREE_SHIPPING_THRESHOLD = 250;
 
 /** Maximum delivery time, in business days. */
-export const DELIVERY_BUSINESS_DAYS = 5;
+export const DELIVERY_BUSINESS_DAYS = 7;
+/** Delivery window shown to customers (matches the terms). */
+export const DELIVERY_TIME = "3–7 ימי עסקים";
 
 /** Exchange window, in business days from delivery. */
 export const EXCHANGE_BUSINESS_DAYS = 14;

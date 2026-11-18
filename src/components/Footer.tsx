@@ -2,7 +2,8 @@ import Link from "next/link";
 import BrandMark from "./BrandMark";
 import OrganicDivider from "./OrganicDivider";
 import { POLICY_LINKS } from "./legal/LegalPage";
-import { WHATSAPP_DISPLAY, categories, whatsappLink } from "@/lib/products";
+import { BUSINESS, MEDICAL_DISCLAIMER, SUPPORT_WHATSAPP_URL } from "@/lib/business";
+import { categories } from "@/lib/products";
 
 const columns = [
   {
@@ -49,16 +50,16 @@ export default function Footer() {
           </p>
           <ul className="space-y-2 text-sm">
             <li>
-              <a
-                href={whatsappLink("שלום CU29, אשמח לקבל פרטים")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-ivory"
-              >
-                וואטסאפ: <span dir="ltr">{WHATSAPP_DISPLAY}</span>
+              <a href={`mailto:${BUSINESS.email}`} className="hover:text-ivory" dir="ltr">
+                {BUSINESS.email}
               </a>
             </li>
-            <li>א׳–ה׳ 9:00–18:00</li>
+            <li>
+              <a href={SUPPORT_WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="hover:text-ivory">
+                טלפון / וואטסאפ: <span dir="ltr">{BUSINESS.phone}</span>
+              </a>
+            </li>
+            <li>{BUSINESS.hours}</li>
           </ul>
         </div>
 
@@ -78,8 +79,19 @@ export default function Footer() {
         ))}
       </div>
       <div className="border-t border-ivory/10">
-        <div className="mx-auto max-w-7xl px-5 py-6 text-center text-xs text-ivory/45 sm:px-8 lg:px-10">
-          <p>© CU29. כל הזכויות שמורות.</p>
+        <div className="mx-auto max-w-7xl space-y-3 px-5 py-7 text-center text-xs leading-6 text-ivory/55 sm:px-8 lg:px-10">
+          <p>
+            {BUSINESS.legalName} | {BUSINESS.idLabel} {BUSINESS.id} | {BUSINESS.address} |{" "}
+            <a href={`mailto:${BUSINESS.email}`} className="hover:text-ivory" dir="ltr">
+              {BUSINESS.email}
+            </a>{" "}
+            | <span dir="ltr">{BUSINESS.phone}</span>
+          </p>
+          <p className="mx-auto max-w-3xl text-ivory/45">
+            <span className="text-ivory/60">גילוי נאות: </span>
+            {MEDICAL_DISCLAIMER}
+          </p>
+          <p className="text-ivory/40">משלוחים בלבד – אין איסוף עצמי ואין קבלת קהל בכתובת העסק. © CU29. כל הזכויות שמורות.</p>
         </div>
       </div>
     </footer>

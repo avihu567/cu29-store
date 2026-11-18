@@ -4,6 +4,7 @@ import ContactForm from "@/components/ContactForm";
 import { WhatsAppIcon } from "@/components/icons";
 import { Container, PageHero } from "@/components/ui";
 import { WHATSAPP_DISPLAY, whatsappLink } from "@/lib/products";
+import { SUPPORT_EMAIL } from "@/lib/business";
 
 export const metadata: Metadata = {
   title: "צור קשר",
@@ -17,7 +18,7 @@ const faqs = [
   },
   {
     q: "כמה זמן לוקח משלוח?",
-    a: "זמן האספקה הוא עד 5 ימי עסקים לכל רחבי הארץ. עלות משלוח 30 ₪, ומשלוח חינם בהזמנה בסך 250 ₪ ומעלה. כל הפרטים בעמוד המשלוחים.",
+    a: "זמן האספקה הוא 3–7 ימי עסקים, עד הבית או לנקודת חלוקה בכל רחבי הארץ (אין איסוף עצמי). עלות משלוח 30 ₪, ומשלוח חינם בהזמנה בסך 250 ₪ ומעלה. כל הפרטים בעמוד המשלוחים.",
     href: "/shipping",
   },
   {
@@ -58,6 +59,12 @@ export default function ContactPage() {
               <dt className="text-xs tracking-[0.2em] text-copper">טלפון</dt>
               <dd className="mt-1 text-ink">
                 <a href={`tel:${WHATSAPP_DISPLAY.replaceAll("-", "")}`} dir="ltr">{WHATSAPP_DISPLAY}</a>
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs tracking-[0.2em] text-copper">אימייל</dt>
+              <dd className="mt-1 text-ink">
+                <a href={`mailto:${SUPPORT_EMAIL}`} dir="ltr" className="hover:text-copper-deep">{SUPPORT_EMAIL}</a>
               </dd>
             </div>
             <div>

@@ -25,7 +25,7 @@ import Gallery from "./Gallery";
 import NotifyForm from "./NotifyForm";
 import StarRating from "./StarRating";
 import {
-  DELIVERY_BUSINESS_DAYS,
+  DELIVERY_TIME,
   FREE_SHIPPING_THRESHOLD,
 } from "@/lib/shipping";
 
@@ -416,7 +416,7 @@ export default function ProductHero({
           {purchasable && (
           <p className="mt-6 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-2xl bg-cream/70 px-4 py-3 text-center text-xs text-stone ring-1 ring-line/60">
             <Link href="/shipping" className="underline-offset-4 hover:text-copper-deep hover:underline">
-              משלוח עד {DELIVERY_BUSINESS_DAYS} ימי עסקים
+              משלוח תוך {DELIVERY_TIME}
             </Link>
             <span aria-hidden="true">·</span>
             <Link href="/shipping" className="underline-offset-4 hover:text-copper-deep hover:underline">

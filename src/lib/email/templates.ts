@@ -1,6 +1,7 @@
 // Hebrew RTL order emails (customer confirmation + store owner alert).
 // Table-based HTML with inline styles so it renders in Gmail, Outlook and
 // Apple Mail. Every customer-provided value is HTML-escaped.
+import { BUSINESS, SUPPORT_EMAIL } from "../business";
 import type { OrderRow } from "../orders";
 
 const C = {
@@ -160,7 +161,7 @@ export function customerEmail(order: OrderRow): { subject: string; html: string;
       <div style="background:${C.tint};border-radius:14px;padding:18px 20px;">
         ${sectionTitle("כתובת למשלוח")}
         ${addressBlock(order, false)}
-        <div style="font-family:${FONT};font-size:13px;color:${C.muted};margin-top:10px;">זמן אספקה משוער: עד 5 ימי עסקים.</div>
+        <div style="font-family:${FONT};font-size:13px;color:${C.muted};margin-top:10px;">זמן אספקה משוער: 3–7 ימי עסקים.</div>
       </div>
     </td></tr>
     ${divider}
@@ -183,7 +184,9 @@ export function customerEmail(order: OrderRow): { subject: string; html: string;
       <p style="font-family:${FONT};font-size:14px;color:${C.brown};margin:0 0 16px;">יש שאלה על ההזמנה? אנחנו כאן בשבילך בוואטסאפ.</p>
       ${button(SUPPORT_WHATSAPP, "כתבו לנו בוואטסאפ")}
       <p style="font-family:${FONT};font-size:12px;color:${C.muted};margin:22px 0 0;line-height:1.8;">
+        או במייל: <a href="mailto:${SUPPORT_EMAIL}" style="color:${C.copperText};" dir="ltr">${SUPPORT_EMAIL}</a><br><br>
         CU29 · כלים מנחושת טהורה 99.9%<br>
+        ${esc(BUSINESS.legalName)} · ${esc(BUSINESS.idLabel)} ${esc(BUSINESS.id)} · ${esc(BUSINESS.address)}<br>
         <a href="${SITE}" style="color:${C.copperText};text-decoration:none;" dir="ltr">cu29ritual.com</a>
       </p>
     </td></tr>`;
@@ -210,7 +213,7 @@ export function customerEmail(order: OrderRow): { subject: string; html: string;
     "שמירה על הבקבוק והברק הטבעי:",
     ...CARE.map((c) => `• ${c}`),
     "",
-    `שאלות? וואטסאפ: ${SUPPORT_WHATSAPP}`,
+    `שאלות? וואטסאפ: ${SUPPORT_WHATSAPP} · מייל: ${SUPPORT_EMAIL}`,
   ].join("\n");
 
   return { subject, html: shell(subject, `ההזמנה #${order.order_number} התקבלה — תודה!`, body), text };
@@ -287,4 +290,82 @@ export function adminEmail(order: OrderRow): { subject: string; html: string; te
     .join("\n");
 
   return { subject, html: shell(subject, `${order.first_name} ${order.last_name} · ${ils(order.total)}`, body), text };
+}
+
+// ───────────────────────── cancellation requests ─────────────────────────
+
+export interface CancellationRequest {
+  reference: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  orderNumber: string;
+  reason?: string;
+  createdAt: string;
+}
+
+const rowsTable = (rows: [string, string][]) =>
+  `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" dir="rtl" style="background:${C.tint};border-radius:12px;">
+    ${rows
+      .map(
+        ([k, v]) => `<tr><td style="padding:9px 16px;font-family:${FONT};font-size:13px;color:${C.muted};white-space:nowrap;" align="right" valign="top">${esc(k)}</td>
+        <td style="padding:9px 16px;font-family:${FONT};font-size:14px;color:${C.brown};" align="right">${esc(v)}</td></tr>`,
+      )
+      .join("")}
+  </table>`;
+
+function cancellationRows(r: CancellationRequest): [string, string][] {
+  return [
+    ["אסמכתא", r.reference],
+    ["מועד הבקשה", r.createdAt],
+    ["שם מלא", r.fullName],
+    ["טלפון", r.phone],
+    ["דוא״ל", r.email],
+    ["מספר הזמנה", r.orderNumber],
+    ["סיבת הביטול", r.reason || "—"],
+  ];
+}
+
+export function cancellationAdminEmail(r: CancellationRequest, orderInfo?: string) {
+  const subject = `בקשת ביטול עסקה (${r.reference}) – הזמנה ${r.orderNumber}`;
+  const body = `
+    <tr><td class="pad" style="padding:34px 40px 10px;" align="right">
+      <div class="h1" style="font-family:${FONT};font-size:23px;color:${C.brown};font-weight:500;">התקבלה בקשת ביטול עסקה</div>
+      <p style="font-family:${FONT};font-size:14px;color:${C.muted};line-height:1.8;margin:8px 0 0;">
+        הבקשה נשלחה דרך טופס הביטול המקוון באתר. לפי חוק הגנת הצרכן, ההחזר הכספי צריך להתבצע תוך 14 ימים מקבלת הודעת הביטול.
+      </p>
+    </td></tr>
+    <tr><td class="pad" style="padding:18px 40px 10px;" align="right">${rowsTable(cancellationRows(r))}</td></tr>
+    ${orderInfo ? `<tr><td class="pad" style="padding:8px 40px 10px;font-family:${FONT};font-size:13px;color:${C.brown};" align="right">${esc(orderInfo)}</td></tr>` : ""}
+    <tr><td style="background:${C.page};border-top:1px solid ${C.tint};padding:24px 32px;margin-top:16px;" align="center">
+      ${button(`${SITE}/admin`, "לניהול ההזמנות")}
+    </td></tr>`;
+  const text = [subject, "", ...cancellationRows(r).map(([k, v]) => `${k}: ${v}`), ...(orderInfo ? ["", orderInfo] : [])].join("\n");
+  return { subject, html: shell(subject, `${r.fullName} · הזמנה ${r.orderNumber}`, body), text };
+}
+
+export function cancellationCustomerEmail(r: CancellationRequest) {
+  const subject = `קיבלנו את בקשת הביטול שלך (${r.reference}) | CU29`;
+  const body = `
+    <tr><td class="pad" style="padding:36px 40px 12px;" align="right">
+      <div class="h1" style="font-family:${FONT};font-size:24px;color:${C.brown};font-weight:500;">שלום ${esc(r.fullName)}, בקשת הביטול התקבלה</div>
+      <p style="font-family:${FONT};font-size:15px;color:${C.muted};line-height:1.9;margin:10px 0 0;">
+        נחזור אליך בהקדם עם הנחיות להחזרת המוצר. ההחזר הכספי יבוצע לאמצעי התשלום המקורי תוך 14 ימים מקבלת הודעת הביטול, בכפוף למדיניות הביטולים וההחזרות.
+      </p>
+    </td></tr>
+    <tr><td class="pad" style="padding:16px 40px 26px;" align="right">${rowsTable(cancellationRows(r))}</td></tr>
+    <tr><td style="background:${C.page};border-top:1px solid ${C.tint};padding:26px 32px;" align="center">
+      <p style="font-family:${FONT};font-size:14px;color:${C.brown};margin:0 0 14px;">שאלות? כתבו לנו בוואטסאפ או במייל <a href="mailto:${SUPPORT_EMAIL}" style="color:${C.copperText};" dir="ltr">${SUPPORT_EMAIL}</a></p>
+      ${button(SUPPORT_WHATSAPP, "כתבו לנו בוואטסאפ")}
+      <p style="font-family:${FONT};font-size:12px;color:${C.muted};margin:18px 0 0;">${esc(BUSINESS.legalName)} · ${esc(BUSINESS.idLabel)} ${esc(BUSINESS.id)} · ${esc(BUSINESS.address)}</p>
+    </td></tr>`;
+  const text = [
+    `שלום ${r.fullName}, בקשת הביטול שלך התקבלה.`,
+    "ההחזר הכספי יבוצע לאמצעי התשלום המקורי תוך 14 ימים מקבלת הודעת הביטול.",
+    "",
+    ...cancellationRows(r).map(([k, v]) => `${k}: ${v}`),
+    "",
+    `שאלות: ${SUPPORT_EMAIL} · ${SUPPORT_WHATSAPP}`,
+  ].join("\n");
+  return { subject, html: shell(subject, `אסמכתא ${r.reference}`, body), text };
 }
