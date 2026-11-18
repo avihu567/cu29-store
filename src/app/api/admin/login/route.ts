@@ -1,25 +1,25 @@
 // POST /api/admin/login { password } → HTTP-only session cookie
 // DELETE /api/admin/login → log out
 import { NextResponse } from "next/server";
-import { ADMIN_COOKIE, SESSION_SECONDS, checkPassword, createSessionToken, isAdminConfigured } from "@/lib/admin-auth";
+import { ADMIN_COOKIE, SESSION_SECONDS, checkPassword, createSessionToken } from "@/lib/admin-auth";
+
+const noStore = { "Cache-Control": "no-store" };
 
 export async function POST(request: Request) {
-  if (!isAdminConfigured()) return Response.json({ error: "admin_not_configured" }, { status: 503 });
-
   let password: unknown;
   try {
     ({ password } = (await request.json()) as { password?: unknown });
   } catch {
-    return Response.json({ error: "bad_request" }, { status: 400 });
+    return NextResponse.json({ error: "בקשה לא תקינה" }, { status: 400, headers: noStore });
   }
 
   if (!checkPassword(password)) {
     // Slow down guessing.
-    await new Promise((r) => setTimeout(r, 800));
-    return Response.json({ error: "wrong_password" }, { status: 401 });
+    await new Promise((r) => setTimeout(r, 600));
+    return NextResponse.json({ error: "סיסמה שגויה" }, { status: 401, headers: noStore });
   }
 
-  const res = NextResponse.json({ ok: true });
+  const res = NextResponse.json({ ok: true }, { headers: noStore });
   res.cookies.set(ADMIN_COOKIE, createSessionToken(), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

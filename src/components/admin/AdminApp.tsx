@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useState } from "react";
 import BrandMark from "../BrandMark";
 import { api, errorText } from "./api";
@@ -20,22 +21,31 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "waitlist", label: "רשימת המתנה" },
 ];
 
-function Login({ adminConfigured, onLogin }: { adminConfigured: boolean; onLogin: () => void }) {
+function Login({ adminConfigured, onLogin }: { adminConfigured: boolean; onLogin: (s: Session) => void }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const errorId = useId();
   const id = useId();
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    setBusy(true);
+    if (loading) return;
+    setLoading(true);
     setError(null);
     try {
       await api("/api/admin/login", { method: "POST", json: { password } });
-      onLogin();
+      // Confirm the session cookie really arrived before switching screens.
+      const session = await api<Session>("/api/admin/session");
+      if (!session.authenticated) {
+        setError("הסיסמה נכונה, אבל הדפדפן לא שמר את ההתחברות. ודאו שעוגיות מופעלות ונסו שוב.");
+        return;
+      }
+      onLogin(session);
     } catch (err) {
-      setError(err instanceof Error && err.message === "wrong_password" ? "סיסמה שגויה" : errorText(err));
-      setBusy(false);
+      setError(errorText(err));
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -66,21 +76,28 @@ function Login({ adminConfigured, onLogin }: { adminConfigured: boolean; onLogin
                 dir="ltr"
                 required
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-ink focus:border-copper focus:outline-none focus:ring-2 focus:ring-copper/25"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (error) setError(null);
+                }}
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? errorId : undefined}
+                className={`w-full rounded-2xl border bg-white px-4 py-3 text-ink focus:border-copper focus:outline-none focus:ring-2 focus:ring-copper/25 ${
+                  error ? "border-red-600/70" : "border-line"
+                }`}
               />
+              {error && (
+                <p id={errorId} role="alert" className="mt-2 text-sm leading-6 text-red-700">
+                  {error}
+                </p>
+              )}
             </div>
-            {error && (
-              <p role="alert" className="text-sm text-red-700">
-                {error}
-              </p>
-            )}
             <button
               type="submit"
-              disabled={busy || !password}
+              disabled={loading || !password.trim()}
               className="btn-copper w-full rounded-full px-6 py-3.5 text-sm disabled:opacity-60"
             >
-              {busy ? "מתחברים…" : "כניסה"}
+              {loading ? "מתחברים…" : "כניסה"}
             </button>
           </>
         )}
@@ -90,6 +107,7 @@ function Login({ adminConfigured, onLogin }: { adminConfigured: boolean; onLogin
 }
 
 export default function AdminApp() {
+  const router = useRouter();
   const [session, setSession] = useState<Session | null>(null);
   const [tab, setTab] = useState<Tab>("orders");
   const [reloadKey, setReloadKey] = useState(0);
@@ -116,7 +134,13 @@ export default function AdminApp() {
       {!session ? (
         <p className="p-10 text-center text-sm text-stone">טוען…</p>
       ) : !session.authenticated ? (
-        <Login adminConfigured={session.adminConfigured} onLogin={recheckSession} />
+        <Login
+          adminConfigured={session.adminConfigured}
+          onLogin={(s) => {
+            setSession(s);
+            router.refresh();
+          }}
+        />
       ) : (
         <div className="min-h-full">
           <header className="sticky top-0 z-10 bg-tobacco-deep text-ivory">

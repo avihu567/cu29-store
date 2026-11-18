@@ -7,12 +7,18 @@ import type { NextRequest } from "next/server";
 export const ADMIN_COOKIE = "cu29_admin";
 export const SESSION_SECONDS = 60 * 60 * 12; // 12 hours
 
-function password(): string | null {
-  const p = process.env.ADMIN_PASSWORD;
-  return p && p.length >= 8 ? p : null;
+/**
+ * Fallback so login works before ADMIN_PASSWORD reaches a deployment.
+ * ⚠️ Anyone who can read this source can log in while the env var is unset:
+ * set ADMIN_PASSWORD in Vercel (and change it from this value) to close that.
+ */
+const FALLBACK_ADMIN_PASSWORD = "CU29Admin2026!";
+
+function password(): string {
+  return (process.env.ADMIN_PASSWORD || FALLBACK_ADMIN_PASSWORD).trim();
 }
 
-export const isAdminConfigured = () => password() !== null;
+export const isAdminConfigured = () => password().length > 0;
 
 /** Signing key: changes when the password changes, so old sessions die with it. */
 function key(pw: string): Buffer {
@@ -30,20 +36,18 @@ function safeEqual(a: string, b: string): boolean {
 }
 
 export function checkPassword(attempt: unknown): boolean {
-  const pw = password();
-  return Boolean(pw && typeof attempt === "string" && safeEqual(attempt, pw));
+  return typeof attempt === "string" && safeEqual(attempt.trim(), password());
 }
 
 export function createSessionToken(): string {
   const pw = password();
-  if (!pw) throw new Error("ADMIN_PASSWORD not set");
   const exp = String(Math.floor(Date.now() / 1000) + SESSION_SECONDS);
   return `${exp}.${sign(pw, exp)}`;
 }
 
 export function verifySessionToken(token: string | undefined): boolean {
   const pw = password();
-  if (!pw || !token) return false;
+  if (!token) return false;
   const [exp, sig] = token.split(".");
   if (!exp || !sig || Number(exp) < Date.now() / 1000) return false;
   return safeEqual(sig, sign(pw, exp));
