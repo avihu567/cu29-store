@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Rubik } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
+import MetaPixel from "@/components/analytics/MetaPixel";
 import "./globals.css";
 
 // Primary typeface for the whole site: soft, rounded, full Hebrew support,
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main className="flex-1">{children}</main>
         <Footer />
         <WhatsAppFloat />
+        <MetaPixel />
       </body>
     </html>
   );

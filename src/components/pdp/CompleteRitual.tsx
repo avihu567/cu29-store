@@ -74,6 +74,7 @@ export default function CompleteRitual({ product }: { product: Product }) {
                     slug={p.slug}
                     color={p.ringColors?.[0] ?? p.colorOptions?.[0]?.id}
                     size={p.sizeOptions?.[0]}
+                    price={p.price}
                     label={p.name}
                   />
                 ) : (

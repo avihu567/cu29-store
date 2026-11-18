@@ -10,6 +10,7 @@ import {
 } from "./offers";
 import { RING_COLORS, formatPrice, getProduct, isPurchasable, type Product, type RingColorId } from "./products";
 import { remainingForFreeShipping, shippingFor } from "./shipping";
+import type { PixelContent } from "./fpixel";
 
 /** Bottles are the products that come with a free silicone ring. */
 export const isBottle = (p: Product) => Boolean(p.ringColors);
@@ -85,6 +86,15 @@ export function priceCart(cartLines: CartLine[]): PricedCart {
     giftSleeveUnlocked: subtotal >= GIFT_SLEEVE_THRESHOLD,
     bottleCount,
   };
+}
+
+/** Meta Pixel `contents` for a priced cart (per-unit price after offers). */
+export function pixelContents(cart: PricedCart): PixelContent[] {
+  return cart.lines.map((l) => ({
+    id: l.product.slug,
+    quantity: l.line.quantity,
+    item_price: Math.round((l.total / l.line.quantity) * 100) / 100,
+  }));
 }
 
 /** Option text for a line, e.g. ["מידה: 700 מ״ל", "צבע: אפור"]. */

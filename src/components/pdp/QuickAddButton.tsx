@@ -2,16 +2,20 @@
 
 import { useState } from "react";
 import { addToCart } from "@/lib/cart";
+import * as fpixel from "@/lib/fpixel";
 
 export default function QuickAddButton({
   slug,
   color,
   size,
+  price,
   label,
 }: {
   slug: string;
   color?: string;
   size?: string;
+  /** Unit price in ILS (for the Meta AddToCart value). */
+  price: number;
   label: string;
 }) {
   const [added, setAdded] = useState(false);
@@ -20,6 +24,7 @@ export default function QuickAddButton({
       type="button"
       onClick={() => {
         addToCart({ slug, quantity: 1, color, size });
+        fpixel.addToCart({ contents: [{ id: slug, quantity: 1, item_price: price }], value: price, name: label });
         setAdded(true);
         setTimeout(() => setAdded(false), 1800);
       }}

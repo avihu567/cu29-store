@@ -16,7 +16,8 @@ import {
   type RingColorId,
 } from "@/lib/products";
 import { FREE_RING_VALUE, SLEEVE_BUMP_PRICE, SLEEVE_PRICE, SLEEVE_SLUG } from "@/lib/offers";
-import { buildOrderMessage, isBottle, priceCart } from "@/lib/pricing";
+import { buildOrderMessage, isBottle, pixelContents, priceCart } from "@/lib/pricing";
+import * as fpixel from "@/lib/fpixel";
 import type { CartLine } from "@/lib/cart";
 import { WhatsAppIcon } from "../icons";
 import QuantitySelector from "../QuantitySelector";
@@ -96,8 +97,24 @@ export default function ProductHero({
 
   function add() {
     pendingLines.forEach((line) => addToCart(line));
+    fpixel.addToCart({ contents: pixelContents(pending), value: pending.subtotal, name: product.name });
     setAdded(true);
   }
+
+  /** Quick WhatsApp order = starting checkout for exactly these items. */
+  function trackQuickOrder() {
+    fpixel.initiateCheckout({ contents: pixelContents(pending), value: pending.total });
+    fpixel.contact(pending.total);
+  }
+
+  // Meta ViewContent: on open, and again when another size is selected.
+  useEffect(() => {
+    fpixel.viewContent({
+      id: product.slug,
+      name: product.name,
+      value: purchasable ? product.price : undefined,
+    });
+  }, [product.slug, product.name, product.price, purchasable]);
 
   // Sticky mobile buy bar: shown once the main CTA scrolls out above the viewport.
   const ctaRef = useRef<HTMLDivElement>(null);
@@ -371,6 +388,7 @@ export default function ProductHero({
                   href={whatsappLink(message)}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={trackQuickOrder}
                   className="lift flex h-13 items-center justify-center gap-2 rounded-full border border-line bg-paper text-sm text-ink hover:border-[#25D366]/60"
                 >
                   <WhatsAppIcon className="h-5 w-5 text-[#25D366]" />

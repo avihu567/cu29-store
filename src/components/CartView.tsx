@@ -11,7 +11,8 @@ import {
   SLEEVE_PRICE,
   SLEEVE_SLUG,
 } from "@/lib/offers";
-import { buildOrderMessage, isBottle, lineOptions, priceCart } from "@/lib/pricing";
+import { buildOrderMessage, isBottle, lineOptions, pixelContents, priceCart } from "@/lib/pricing";
+import * as fpixel from "@/lib/fpixel";
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
 import { WhatsAppIcon } from "./icons";
 import ProductArt from "./ProductArt";
@@ -77,7 +78,11 @@ export default function CartView({
       e.preventDefault();
       setShowTermsError(true);
       termsRef.current?.focus();
+      return;
     }
+    // The order really goes out: track checkout + the WhatsApp contact.
+    fpixel.initiateCheckout({ contents: pixelContents(cart), value: cart.total });
+    fpixel.contact(cart.total);
   }
 
   // Progress bar: 0 → tier 2 (₪310), with a marker at tier 1 (₪250).
