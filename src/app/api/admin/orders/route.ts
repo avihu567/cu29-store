@@ -2,9 +2,9 @@
 import type { NextRequest } from "next/server";
 import { isAdminRequest, unauthorized } from "@/lib/admin-auth";
 import { ORDER_ADMIN_COLUMNS, ORDER_STATUSES, type OrderStatus } from "@/lib/orders";
-import { DB_NOT_CONFIGURED, getSupabaseAdmin } from "@/lib/supabase-admin";
+import { DB_NOT_CONFIGURED, getSupabaseAdmin, serverError } from "@/lib/supabase-admin";
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   if (!isAdminRequest(request)) return unauthorized();
   const db = getSupabaseAdmin();
   if (!db) return Response.json(DB_NOT_CONFIGURED, { status: 503 });
@@ -19,4 +19,12 @@ export async function GET(request: NextRequest) {
     return Response.json({ error: "db_error" }, { status: 500 });
   }
   return Response.json({ orders: data }, { headers: { "Cache-Control": "no-store" } });
+}
+
+export async function GET(...args: Parameters<typeof handleGET>): Promise<Response> {
+  try {
+    return await handleGET(...args);
+  } catch (err) {
+    return serverError("admin/orders", err);
+  }
 }

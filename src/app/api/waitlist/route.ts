@@ -1,11 +1,11 @@
 // POST /api/waitlist — "עדכנו אותי" signups for coming-soon products.
 import { getProduct } from "@/lib/products";
-import { DB_NOT_CONFIGURED, getSupabaseAdmin } from "@/lib/supabase-admin";
+import { DB_NOT_CONFIGURED, getSupabaseAdmin, serverError } from "@/lib/supabase-admin";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE = /^(\+972|0)[\d\s-]{8,12}$/;
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const db = getSupabaseAdmin();
   if (!db) return Response.json(DB_NOT_CONFIGURED, { status: 503 });
 
@@ -38,4 +38,12 @@ export async function POST(request: Request) {
     return Response.json({ error: "db_error" }, { status: 500 });
   }
   return Response.json({ ok: true });
+}
+
+export async function POST(...args: Parameters<typeof handlePOST>): Promise<Response> {
+  try {
+    return await handlePOST(...args);
+  } catch (err) {
+    return serverError("waitlist", err);
+  }
 }

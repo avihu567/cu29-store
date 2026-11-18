@@ -2,9 +2,9 @@
 // (also serves as the abandoned-cart lead). Prices are recalculated on the
 // server from the catalog; nothing price-related is trusted from the browser.
 import { buildOrderFields, type OrderDraftBody } from "@/lib/order-draft";
-import { DB_NOT_CONFIGURED, getSupabaseAdmin } from "@/lib/supabase-admin";
+import { DB_NOT_CONFIGURED, getSupabaseAdmin, serverError } from "@/lib/supabase-admin";
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const db = getSupabaseAdmin();
   if (!db) return Response.json(DB_NOT_CONFIGURED, { status: 503 });
 
@@ -29,4 +29,12 @@ export async function POST(request: Request) {
     return Response.json({ error: "db_error" }, { status: 500 });
   }
   return Response.json({ id: data.id, orderNumber: data.order_number, token: data.access_token, total: data.total });
+}
+
+export async function POST(...args: Parameters<typeof handlePOST>): Promise<Response> {
+  try {
+    return await handlePOST(...args);
+  } catch (err) {
+    return serverError("orders", err);
+  }
 }

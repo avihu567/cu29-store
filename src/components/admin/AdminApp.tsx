@@ -12,7 +12,14 @@ interface Session {
   authenticated: boolean;
   adminConfigured: boolean;
   dbConfigured: boolean;
+  dbStatus?: "ok" | "missing_key" | "invalid_url" | "client_error";
 }
+
+const DB_HINT: Record<string, string> = {
+  missing_key: "חסר המפתח הסודי SUPABASE_SERVICE_ROLE_KEY (או שעדיין מופיע בו PASTE_…).",
+  invalid_url: "הכתובת ב-NEXT_PUBLIC_SUPABASE_URL אינה תקינה (צריכה להיות https://….supabase.co, בלי מירכאות).",
+  client_error: "לא ניתן היה ליצור חיבור ל-Supabase עם המפתחות שהוגדרו.",
+};
 
 type Tab = "orders" | "inventory" | "waitlist";
 const TABS: { id: Tab; label: string }[] = [
@@ -178,7 +185,9 @@ export default function AdminApp() {
           <main className="mx-auto max-w-7xl px-4 py-8 sm:px-8">
             {!session.dbConfigured && (
               <div className="mb-6 rounded-2xl border border-copper/40 bg-copper-pale/40 px-5 py-4 text-sm leading-7">
-                <strong className="font-medium">מסד הנתונים עדיין לא מחובר.</strong> יש להדביק את המפתחות של Supabase
+                <strong className="font-medium">מסד הנתונים עדיין לא מחובר.</strong>{" "}
+                {session.dbStatus && DB_HINT[session.dbStatus] && <>{DB_HINT[session.dbStatus]} </>}
+                יש להדביק את המפתחות של Supabase
                 (NEXT_PUBLIC_SUPABASE_ANON_KEY ו-SUPABASE_SERVICE_ROLE_KEY) ב-‎.env.local וב-Vercel, ולהריץ פעם אחת את
                 הקובץ supabase/schema.sql ב-SQL Editor של Supabase.
               </div>

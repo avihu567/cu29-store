@@ -2,10 +2,11 @@
 // DELETE /api/admin/login → log out
 import { NextResponse } from "next/server";
 import { ADMIN_COOKIE, SESSION_SECONDS, checkPassword, createSessionToken } from "@/lib/admin-auth";
+import { serverError } from "@/lib/supabase-admin";
 
 const noStore = { "Cache-Control": "no-store" };
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   let password: unknown;
   try {
     ({ password } = (await request.json()) as { password?: unknown });
@@ -34,4 +35,12 @@ export async function DELETE() {
   const res = NextResponse.json({ ok: true });
   res.cookies.set(ADMIN_COOKIE, "", { httpOnly: true, path: "/", maxAge: 0 });
   return res;
+}
+
+export async function POST(...args: Parameters<typeof handlePOST>): Promise<Response> {
+  try {
+    return await handlePOST(...args);
+  } catch (err) {
+    return serverError("admin/login", err);
+  }
 }

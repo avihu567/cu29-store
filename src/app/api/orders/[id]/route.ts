@@ -6,7 +6,7 @@
 //         set, PayPal is asked first; a wrong amount becomes 'payment_review'.
 import { createHash, timingSafeEqual } from "node:crypto";
 import { verifyPayPalOrder } from "@/lib/payments/paypal-server";
-import { DB_NOT_CONFIGURED, getSupabaseAdmin } from "@/lib/supabase-admin";
+import { DB_NOT_CONFIGURED, getSupabaseAdmin, serverError } from "@/lib/supabase-admin";
 import { buildOrderFields, type OrderDraftBody } from "@/lib/order-draft";
 
 interface PatchBody extends OrderDraftBody {
@@ -21,7 +21,7 @@ const UUID = /^[0-9a-f-]{36}$/i;
 const sameToken = (a: string, b: string) =>
   timingSafeEqual(createHash("sha256").update(a).digest(), createHash("sha256").update(b).digest());
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+async function handlePATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const db = getSupabaseAdmin();
   if (!db) return Response.json(DB_NOT_CONFIGURED, { status: 503 });
 
@@ -76,4 +76,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   return Response.json({ error: "bad_action" }, { status: 400 });
+}
+
+export async function PATCH(...args: Parameters<typeof handlePATCH>): Promise<Response> {
+  try {
+    return await handlePATCH(...args);
+  } catch (err) {
+    return serverError("orders/[id]", err);
+  }
 }

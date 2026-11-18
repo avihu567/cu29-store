@@ -30,6 +30,8 @@ export function errorText(err: unknown): string {
     if (HEBREW.test(err.code)) return err.code;
     if (err.status === 401) return "פג תוקף ההתחברות. נא להתחבר מחדש.";
     if (err.code === "db_not_configured") return "מסד הנתונים עדיין לא מחובר (חסרים מפתחות Supabase).";
+    if (err.code === "db_error")
+      return "Supabase דחה את הבקשה: בדקו שהמפתח הסודי נכון ושהקובץ supabase/schema.sql הורץ ב-SQL Editor.";
     return `שגיאה (${err.code}). נסו שוב.`;
   }
   return "שגיאת רשת. בדקו את החיבור ונסו שוב.";

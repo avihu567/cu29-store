@@ -2,7 +2,7 @@
 import type { NextRequest } from "next/server";
 import { isAdminRequest, unauthorized } from "@/lib/admin-auth";
 import { ORDER_ADMIN_COLUMNS, ORDER_STATUSES, type OrderStatus } from "@/lib/orders";
-import { DB_NOT_CONFIGURED, getSupabaseAdmin } from "@/lib/supabase-admin";
+import { DB_NOT_CONFIGURED, getSupabaseAdmin, serverError } from "@/lib/supabase-admin";
 
 const STAMP: Partial<Record<OrderStatus, string>> = {
   paid: "paid_at",
@@ -10,7 +10,7 @@ const STAMP: Partial<Record<OrderStatus, string>> = {
   delivered: "delivered_at",
 };
 
-export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function handlePATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!isAdminRequest(request)) return unauthorized();
   const db = getSupabaseAdmin();
   if (!db) return Response.json(DB_NOT_CONFIGURED, { status: 503 });
@@ -34,4 +34,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     .single();
   if (error || !data) return Response.json({ error: "db_error" }, { status: 500 });
   return Response.json({ order: data });
+}
+
+export async function PATCH(...args: Parameters<typeof handlePATCH>): Promise<Response> {
+  try {
+    return await handlePATCH(...args);
+  } catch (err) {
+    return serverError("admin/orders/[id]", err);
+  }
 }
