@@ -2,38 +2,23 @@
 // Import ONLY from route handlers / server code. Never from a "use client" file.
 //
 // Initialization never throws: a missing or malformed env var (e.g. a URL
-// pasted with quotes, or without https://) makes getSupabaseAdmin() return
+// pasted with quotes, as a Markdown link, or without https://) makes getSupabaseAdmin() return
 // null with a reason, instead of crashing every route with an HTTP 500.
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { unstable_rethrow } from "next/navigation";
+import { cleanEnv, cleanUrlEnv } from "./env";
 
 const DEFAULT_SUPABASE_URL = "https://iaunbxxrdrfyhqiqadkq.supabase.co";
 
 export type DbStatus = "ok" | "missing_key" | "invalid_url" | "client_error";
-
-/** Trim whitespace and surrounding quotes that often sneak in when pasting env vars. */
-function clean(v: string | undefined): string {
-  return (v ?? "").trim().replace(/^["']+|["']+$/g, "").trim();
-}
-
-function normalizeUrl(raw: string): string | null {
-  let v = clean(raw) || DEFAULT_SUPABASE_URL;
-  if (!/^https?:\/\//i.test(v)) v = `https://${v}`;
-  try {
-    const u = new URL(v);
-    return u.origin; // drops paths like /rest/v1/ and trailing slashes
-  } catch {
-    return null;
-  }
-}
 
 let client: SupabaseClient | null = null;
 let status: DbStatus | null = null;
 
 function init() {
   if (status) return;
-  const key = clean(process.env.SUPABASE_SERVICE_ROLE_KEY);
-  const url = normalizeUrl(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "");
+  const key = cleanEnv(process.env.SUPABASE_SERVICE_ROLE_KEY);
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ? cleanUrlEnv(process.env.NEXT_PUBLIC_SUPABASE_URL) : DEFAULT_SUPABASE_URL;
   if (!key || key.startsWith("PASTE_")) {
     status = "missing_key";
     return;

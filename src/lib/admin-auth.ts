@@ -3,6 +3,7 @@
 // the browser; the cookie holds only an expiry time and its HMAC signature.
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
+import { cleanEnv } from "./env";
 
 export const ADMIN_COOKIE = "cu29_admin";
 export const SESSION_SECONDS = 60 * 60 * 12; // 12 hours
@@ -14,9 +15,6 @@ export const SESSION_SECONDS = 60 * 60 * 12; // 12 hours
  */
 const FALLBACK_ADMIN_PASSWORD = "CU29Admin2026!";
 
-/** Env values pasted as "value" or 'value' (or with spaces/newlines) are cleaned. */
-const cleanEnv = (v: string | undefined) => (v ?? "").trim().replace(/^["']+|["']+$/g, "").trim();
-
 function password(): string {
   return cleanEnv(process.env.ADMIN_PASSWORD) || FALLBACK_ADMIN_PASSWORD;
 }
@@ -26,7 +24,7 @@ export const isAdminConfigured = () => password().length > 0;
 /** Signing key: changes when the password changes, so old sessions die with it. */
 function key(pw: string): Buffer {
   return createHash("sha256")
-    .update(`cu29-admin|${pw}|${process.env.SUPABASE_SERVICE_ROLE_KEY ?? ""}`)
+    .update(`cu29-admin|${pw}|${cleanEnv(process.env.SUPABASE_SERVICE_ROLE_KEY)}`)
     .digest();
 }
 
