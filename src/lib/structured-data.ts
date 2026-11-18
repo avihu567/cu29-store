@@ -1,5 +1,5 @@
 // schema.org structured data (JSON-LD) for SEO.
-import type { GalleryImage, Product } from "./products";
+import { isPurchasable, type GalleryImage, type Product } from "./products";
 
 export const SITE_URL = "https://cu29ritual.com";
 
@@ -51,7 +51,7 @@ export function productJsonLd(product: Product, gallery: GalleryImage[]) {
         },
       ],
     }),
-    ...(product.price !== undefined && {
+    ...(isPurchasable(product) && {
       offers: {
         "@type": "Offer",
         url,

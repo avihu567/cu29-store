@@ -115,6 +115,11 @@ export interface Product {
   colorOptions?: ColorOption[];
   /** Accessories skip the copper benefit/care sections on their page. */
   accessory?: boolean;
+  /**
+   * Upcoming item ("בקרוב בקולקציה"): shown with a branded placeholder and a
+   * notify form; price hidden and it can never be added to the cart.
+   */
+  isComingSoon?: boolean;
 }
 
 export const WHATSAPP_NUMBER = "972508898101";
@@ -124,8 +129,9 @@ export function whatsappLink(message: string): string {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
 
-export function isAvailable(p: Product): p is Product & { price: number } {
-  return p.price !== undefined;
+/** Can be bought right now: has a price and is not coming soon. */
+export function isPurchasable(p: Product): p is Product & { price: number } {
+  return p.price !== undefined && !p.isComingSoon;
 }
 
 export function formatPrice(value: number): string {
@@ -299,7 +305,8 @@ export const products: Product[] = [
     titleEn: "The Pure Water Vessel",
     subtitle: "מיכל אגירה עם ברז",
     category: "vessels",
-    imageDir: "vessels-4l",
+    imageDir: "/images/upcoming/vessels",
+    isComingSoon: true,
     size: "4 ליטר",
     price: 749,
     art: "dispenser",
@@ -317,7 +324,8 @@ export const products: Product[] = [
     titleEn: "The Ritual Cups",
     subtitle: "2 כוסות שתייה בעיצוב עדין",
     category: "cups",
-    imageDir: "cups",
+    imageDir: "/images/upcoming/cups",
+    isComingSoon: true,
     size: "זוג (2 כוסות)",
     price: 79,
     art: "tumbler",
@@ -334,9 +342,9 @@ export const products: Product[] = [
     titleEn: "The Wellness Bracelet",
     subtitle: "צמיד נחושת טהורה בעיצוב עדין",
     category: "jewelry",
-    imageDir: "jewelry",
+    imageDir: "/images/upcoming/bracelets",
+    isComingSoon: true,
     art: "bracelet",
-    badge: "בקרוב",
     shortDescription: "צמיד נחושת עדין ליום־יום, נעים למגע ומתיישן יפה.",
     description: [
       "צמיד נחושת טהורה בעיצוב מינימליסטי, שמתאים לכל מראה ולכל שעה ביום.",

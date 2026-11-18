@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import BrandMark from "@/components/BrandMark";
+import BrandPlaceholder from "@/components/BrandPlaceholder";
+import { DropIcon, LemonIcon, PolishIcon, SaltIcon } from "@/components/LineIcons";
 import LifestylePhoto from "@/components/LifestylePhoto";
-import ProductArt from "@/components/ProductArt";
 import { ButtonLink, Container, Eyebrow } from "@/components/ui";
 import { braceletUsage, careSteps, vesselUsage } from "@/lib/care";
 import { getLifestyleAlt, getLifestyleImage } from "@/lib/lifestyle";
+import { getGallery, getProductImages } from "@/lib/product-images";
+import { getProduct } from "@/lib/products";
 
 export const metadata: Metadata = {
   title: "הטקס",
@@ -22,35 +26,53 @@ const chapters = [
   { id: "usage", label: "שימוש יומיומי" },
 ];
 
+/**
+ * Collection cards. Bottles show a real product photo; upcoming categories
+ * show the branded placeholder until a photo is dropped into their folder
+ * (public/images/categories/<folder>/).
+ */
 const collection = [
   {
     title: "בקבוקים וכוסות",
     text: "לליווי צמוד בדרך, בעבודה או באימון, ולשתייה מודעת בבית או במשרד המעניקה מים צלולים ומרעננים.",
-    art: "bottle" as const,
+    productSlug: "copper-bottle-700ml",
     href: "/shop#bottles",
     tone: "bg-cream",
+    comingSoon: false,
   },
   {
     title: "מיכלי מים",
     text: "פריטי נוי פונקציונליים למטבח ולחלל המגורים, המהווים את לב הבית ומאפשרים אגירת מים מטוהרים לכל בני המשפחה.",
-    art: "dispenser" as const,
+    folder: "/images/categories/vessels",
     href: "/shop#vessels",
     tone: "bg-wood-light/70",
+    comingSoon: true,
   },
   {
     title: "צמידי נחושת",
     text: "תכשיטי וולנס המיועדים לענידה יומיומית, ומאפשרים לגוף לספוג את תכונות המתכת העתיקה דרך מגע ישיר עם העור.",
-    art: "bracelet" as const,
+    folder: "/images/categories/bracelets",
     href: "/shop#jewelry",
     tone: "bg-copper-pale/70",
+    comingSoon: true,
   },
 ];
 
+/** The first photo for a collection card: product gallery or category folder. */
+function collectionPhoto(c: (typeof collection)[number]): { src: string; alt: string } | undefined {
+  if (c.productSlug) {
+    const product = getProduct(c.productSlug);
+    return product ? getGallery(product)[0] : undefined;
+  }
+  const src = c.folder ? getProductImages(c.folder)[0] : undefined;
+  return src ? { src, alt: c.title } : undefined;
+}
+
 const shineRecipe = [
-  { icon: "🧂", title: "כפית מלח", text: "מערבבים עם מיץ לימון טרי לעיסה עדינה." },
-  { icon: "🍋", title: "מיץ לימון", text: "החומצה הטבעית ממיסה את כתמי החמצון." },
-  { icon: "🤲", title: "שפשוף עדין", text: "במטלית רכה, בתנועות סיבוביות, מבחוץ ומבפנים." },
-  { icon: "💧", title: "שטיפה וייבוש", text: "במים פושרים, וייבוש מלא במגבת רכה." },
+  { Icon: SaltIcon, title: "כפית מלח", text: "מערבבים עם מיץ לימון טרי לעיסה עדינה." },
+  { Icon: LemonIcon, title: "מיץ לימון", text: "החומצה הטבעית ממיסה את כתמי החמצון." },
+  { Icon: PolishIcon, title: "שפשוף עדין", text: "במטלית רכה, בתנועות סיבוביות, מבחוץ ומבפנים." },
+  { Icon: DropIcon, title: "שטיפה וייבוש", text: "במים פושרים, וייבוש מלא במגבת רכה." },
 ];
 
 const dailyRitual = [
@@ -93,6 +115,8 @@ export default function RitualPage() {
   const coverPhoto = getLifestyleImage("ritual");
   const ayurvedaPhoto = getLifestyleImage("ritual-2");
   const carePhoto = getLifestyleImage("ritual-3");
+  const usageBottleProduct = getProduct("copper-bottle-700ml");
+  const usageBottle = usageBottleProduct ? getGallery(usageBottleProduct)[0] : undefined;
 
   return (
     <>
@@ -153,7 +177,7 @@ export default function RitualPage() {
       </nav>
 
       {/* ───────── 01 Ayurveda · Tamra Jal ───────── */}
-      <section id="ayurveda" className="scroll-mt-44 py-24 sm:py-36">
+      <section id="ayurveda" className="scroll-mt-56 lg:scroll-mt-64 py-24 sm:py-36">
         <Container className="grid gap-16 lg:grid-cols-[1.4fr_1fr] lg:gap-24">
           <div>
             <Chapter index={1} en="AYURVEDA · TAMRA JAL" title="תורת האיורוודה" subtitle="מדע החיים העתיק שמאחורי המתכת." />
@@ -209,7 +233,7 @@ export default function RitualPage() {
       </section>
 
       {/* ───────── 02 Copper · antimicrobial ───────── */}
-      <section id="copper" className="scroll-mt-44 px-3 sm:px-5">
+      <section id="copper" className="scroll-mt-56 lg:scroll-mt-64 px-3 sm:px-5">
         <div className="overflow-hidden rounded-[2rem] bg-tobacco-deep text-ivory sm:rounded-[2.75rem]">
           <Container className="grid items-center gap-16 py-24 sm:py-36 lg:grid-cols-[1.2fr_1fr]">
             <div>
@@ -250,21 +274,38 @@ export default function RitualPage() {
       </section>
 
       {/* ───────── 03 Collection ───────── */}
-      <section id="collection" className="scroll-mt-44 py-24 sm:py-36">
+      <section id="collection" className="scroll-mt-56 lg:scroll-mt-64 py-24 sm:py-36">
         <Container>
           <Chapter index={3} en="THE CU COLLECTION" title="הטקס היומיומי שלך" subtitle="שגרת בריאות שלמה מבוססת נחושת." />
           <p className="mt-8 max-w-3xl text-lg leading-9 text-ink/80">
             הסדרה שלנו נועדה להשתלב באופן טבעי בכל רגע ביום שלך:
           </p>
           <div className="mt-12 grid gap-5 md:grid-cols-3">
-            {collection.map((c) => (
+            {collection.map((c) => {
+              const photo = collectionPhoto(c);
+              return (
               <Link
                 key={c.title}
                 href={c.href}
                 className={`reveal group flex flex-col overflow-hidden rounded-[var(--radius-card)] ${c.tone} ring-1 ring-transparent transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[var(--shadow-lift)] hover:ring-copper/35`}
               >
-                <div className="flex h-60 items-center justify-center">
-                  <ProductArt variant={c.art} className="h-48 w-auto drop-shadow-[10px_20px_18px_rgba(91,63,44,0.25)] transition-transform duration-700 group-hover:scale-105" />
+                <div className="relative aspect-[4/3] overflow-hidden bg-white">
+                  {photo ? (
+                    <Image
+                      src={photo.src}
+                      alt={photo.alt}
+                      fill
+                      sizes="(min-width: 768px) 33vw, 100vw"
+                      className="object-contain transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <BrandPlaceholder />
+                  )}
+                  {c.comingSoon && (
+                    <span className="absolute start-4 top-4 z-10 rounded-full bg-paper/90 px-3 py-1 text-[11px] tracking-[0.1em] text-copper-deep ring-1 ring-copper/20 backdrop-blur">
+                      בקרוב
+                    </span>
+                  )}
                 </div>
                 <div className="flex-1 px-8 pb-8">
                   <h3 className="font-serif text-2xl text-ink">{c.title}</h3>
@@ -272,13 +313,14 @@ export default function RitualPage() {
                   <span className="mt-6 inline-block text-sm text-copper-deep">לגלות ←</span>
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </Container>
       </section>
 
       {/* ───────── 04 Care: natural shine ───────── */}
-      <section id="care" className="scroll-mt-44 px-3 sm:px-5">
+      <section id="care" className="scroll-mt-56 lg:scroll-mt-64 px-3 sm:px-5">
         <div className="texture-stone bg-cream" style={{ borderRadius: "var(--radius-organic)" }}>
           <Container className="py-24 sm:py-36">
             <div className="grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-20">
@@ -317,11 +359,16 @@ export default function RitualPage() {
                 <h3 className="mt-4 font-serif text-3xl font-light text-ink">לימון ומלח: הנוסחה העתיקה</h3>
                 <ul className="mt-8 grid grid-cols-2 gap-3">
                   {shineRecipe.map((r, i) => (
-                    <li key={r.title} className="rounded-3xl bg-cream/70 p-5">
-                      <span className="text-3xl" aria-hidden="true">{r.icon}</span>
-                      <p className="mt-3 text-xs text-copper-deep" dir="ltr" style={{ textAlign: "right" }}>
-                        שלב {i + 1}
-                      </p>
+                    <li key={r.title} className="rounded-3xl bg-cream/70 p-5 ring-1 ring-line/50">
+                      <div className="flex items-center justify-between">
+                        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-paper text-[#8C583A] ring-1 ring-copper/20">
+                          <r.Icon />
+                        </span>
+                        <span className="font-display text-2xl italic text-copper/50" dir="ltr">
+                          0{i + 1}
+                        </span>
+                      </div>
+                      <p className="mt-4 text-[11px] tracking-[0.2em] text-copper-deep">שלב {i + 1}</p>
                       <p className="font-serif text-lg text-ink">{r.title}</p>
                       <p className="mt-1 text-xs leading-5 text-stone">{r.text}</p>
                     </li>
@@ -339,7 +386,7 @@ export default function RitualPage() {
       </section>
 
       {/* ───────── 05 Daily usage ───────── */}
-      <section id="usage" className="scroll-mt-44 py-24 sm:py-36">
+      <section id="usage" className="scroll-mt-56 lg:scroll-mt-64 py-24 sm:py-36">
         <Container>
           <Chapter index={5} en="HOW TO USE YOUR COPPERWARE" title="שימוש יומיומי נכון" subtitle="הדרך הנכונה למקסם את החוויה." />
 
@@ -355,15 +402,23 @@ export default function RitualPage() {
           </ol>
 
           <div className="mt-6 grid gap-4 lg:grid-cols-2">
-            <div className="flex gap-6 rounded-[var(--radius-card)] bg-cream p-8">
-              <ProductArt variant="bottle-slim" ringColor="#25282A" className="h-36 w-auto shrink-0" />
+            <div className="flex gap-6 rounded-[var(--radius-card)] bg-cream p-6 sm:p-8">
+              <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-3xl bg-white ring-1 ring-line/60 sm:h-32 sm:w-32">
+                {usageBottle ? (
+                  <Image src={usageBottle.src} alt={usageBottle.alt} fill sizes="128px" className="object-contain" />
+                ) : (
+                  <BrandPlaceholder size="sm" />
+                )}
+              </div>
               <div>
                 <h3 className="font-serif text-2xl text-ink">למיכלי מים, בקבוקים וכוסות</h3>
                 <p className="mt-3 leading-8 text-ink/75">{vesselUsage}</p>
               </div>
             </div>
-            <div className="flex gap-6 rounded-[var(--radius-card)] bg-copper-pale/60 p-8">
-              <ProductArt variant="bracelet" className="h-36 w-auto shrink-0" />
+            <div className="flex gap-6 rounded-[var(--radius-card)] bg-copper-pale/60 p-6 sm:p-8">
+              <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-3xl sm:h-32 sm:w-32">
+                <BrandPlaceholder size="sm" />
+              </div>
               <div>
                 <h3 className="font-serif text-2xl text-ink">לצמידי הנחושת</h3>
                 <p className="mt-3 leading-8 text-ink/75">{braceletUsage}</p>

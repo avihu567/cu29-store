@@ -2,7 +2,7 @@ import Link from "next/link";
 import ProductImage from "../ProductImage";
 import QuickAddButton from "./QuickAddButton";
 import { getGallery } from "@/lib/product-images";
-import { formatPrice, products, whatsappLink, type Product } from "@/lib/products";
+import { formatPrice, isPurchasable, products, type Product } from "@/lib/products";
 
 /** The best-selling item of each other category, so the set "completes" the ritual. */
 function pickComplements(current: Product): Product[] {
@@ -46,11 +46,12 @@ export default function CompleteRitual({ product }: { product: Product }) {
                     art={p.art}
                     alt={p.name}
                     sizes="(min-width: 640px) 33vw, 100vw"
+                    placeholder={p.isComingSoon ? "" : undefined}
                   />
                 </div>
-                {p.badge && (
-                  <span className="absolute start-3 top-3 rounded-full bg-ivory/90 px-3 py-1 text-xs text-copper-deep">
-                    {p.badge}
+                {(p.isComingSoon || p.badge) && (
+                  <span className="absolute start-3 top-3 z-10 rounded-full bg-paper/90 px-3 py-1 text-xs text-copper-deep ring-1 ring-copper/20">
+                    {p.isComingSoon ? "בקרוב בקולקציה" : p.badge}
                   </span>
                 )}
               </Link>
@@ -64,11 +65,11 @@ export default function CompleteRitual({ product }: { product: Product }) {
                   </p>
                 </div>
                 <span className="shrink-0 text-ink">
-                  {p.price !== undefined ? formatPrice(p.price) : "בקרוב"}
+                  {isPurchasable(p) ? formatPrice(p.price) : <span className="text-xs text-copper-deep">השקה בקרוב</span>}
                 </span>
               </div>
               <div className="mt-4">
-                {p.price !== undefined ? (
+                {isPurchasable(p) ? (
                   <QuickAddButton
                     slug={p.slug}
                     color={p.ringColors?.[0] ?? p.colorOptions?.[0]?.id}
@@ -76,14 +77,12 @@ export default function CompleteRitual({ product }: { product: Product }) {
                     label={p.name}
                   />
                 ) : (
-                  <a
-                    href={whatsappLink(`שלום CU29, אשמח לקבל עדכון כשהמוצר "${p.name}" יהיה זמין`)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-full rounded-full border border-stone-muted px-4 py-2.5 text-center text-sm text-stone transition-colors hover:border-ink hover:text-ink"
+                  <Link
+                    href={`/product/${p.slug}#notify`}
+                    className="block w-full rounded-full border border-stone-muted px-4 py-2.5 text-center text-sm text-stone transition-colors hover:border-copper/60 hover:text-copper-deep"
                   >
-                    עדכנו אותי כשיגיע
-                  </a>
+                    עדכנו אותי בהשקה
+                  </Link>
                 )}
               </div>
             </li>

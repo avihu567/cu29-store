@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { getProduct } from "./products";
+import { getProduct, isPurchasable } from "./products";
 
 export interface CartLine {
   slug: string;
@@ -36,11 +36,14 @@ function load() {
   loaded = true;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    // Drop items whose product was removed or is no longer purchasable.
+    // Drop items whose product was removed, has no price or is coming soon.
     // (Carts saved before options existed are still valid: the fields are optional.)
     if (raw)
       lines = (JSON.parse(raw) as CartLine[]).filter(
-        (l) => getProduct(l.slug)?.price !== undefined,
+        (l) => {
+          const p = getProduct(l.slug);
+          return Boolean(p && isPurchasable(p));
+        },
       );
   } catch {
     lines = EMPTY;

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import BrandPlaceholder from "./BrandPlaceholder";
 import ProductArt from "./ProductArt";
 import { getGallery } from "@/lib/product-images";
 import { type Product, formatPrice } from "@/lib/products";
@@ -14,9 +15,9 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <Link href={`/product/${product.slug}`} className="reveal group block">
       <div className="relative aspect-square overflow-hidden rounded-[var(--radius-card)] bg-white ring-1 ring-line/60 transition-all duration-500 ease-out group-hover:-translate-y-1.5 group-hover:shadow-[var(--shadow-lift)] group-hover:ring-copper/35">
-        {product.badge && (
+        {(product.isComingSoon || product.badge) && (
           <span className="absolute start-4 top-4 z-10 rounded-full bg-paper/90 px-3 py-1 text-[11px] tracking-[0.08em] text-copper-deep ring-1 ring-copper/20 backdrop-blur">
-            {product.badge}
+            {product.isComingSoon ? "בקרוב בקולקציה" : product.badge}
           </span>
         )}
 
@@ -41,6 +42,8 @@ export default function ProductCard({ product }: { product: Product }) {
               />
             )}
           </div>
+        ) : product.isComingSoon ? (
+          <BrandPlaceholder />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center p-8 transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]">
             <ProductArt
@@ -64,9 +67,11 @@ export default function ProductCard({ product }: { product: Product }) {
         </div>
         <div className="shrink-0 text-end">
           <p className="text-sm text-ink">
-            {product.price !== undefined ? formatPrice(product.price) : "בקרוב"}
+            {product.isComingSoon || product.price === undefined
+              ? <span className="text-xs tracking-[0.06em] text-copper-deep">השקה בקרוב</span>
+              : formatPrice(product.price)}
           </p>
-          {product.compareAtPrice && (
+          {product.compareAtPrice && !product.isComingSoon && (
             <p className="text-xs text-stone line-through">{formatPrice(product.compareAtPrice)}</p>
           )}
         </div>

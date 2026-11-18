@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
+import BrandPlaceholder from "../BrandPlaceholder";
 import ProductArt from "../ProductArt";
 import type { ArtVariant, GalleryImage } from "@/lib/products";
 
@@ -18,6 +19,7 @@ export default function Gallery({
   alt,
   badge,
   ringColor,
+  placeholder = false,
 }: {
   images: GalleryImage[];
   art: ArtVariant;
@@ -25,6 +27,8 @@ export default function Gallery({
   alt: string;
   badge?: string;
   ringColor?: string;
+  /** No photos yet: show the branded placeholder instead of the drawing. */
+  placeholder?: boolean;
 }) {
   const [active, setActive] = useState(0);
   // Images that have been shown at least once (so they stay mounted for the fade).
@@ -79,6 +83,8 @@ export default function Gallery({
               </svg>
             </span>
           </button>
+        ) : placeholder ? (
+          <BrandPlaceholder size="lg" label={alt} />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="absolute h-2/3 w-2/3 rounded-full bg-wood-light/70 blur-3xl" />

@@ -8,7 +8,7 @@ import {
   SLEEVE_PRICE,
   SLEEVE_SLUG,
 } from "./offers";
-import { RING_COLORS, formatPrice, getProduct, type Product, type RingColorId } from "./products";
+import { RING_COLORS, formatPrice, getProduct, isPurchasable, type Product, type RingColorId } from "./products";
 import { remainingForFreeShipping, shippingFor } from "./shipping";
 
 /** Bottles are the products that come with a free silicone ring. */
@@ -43,9 +43,7 @@ export interface PricedCart {
 export function priceCart(cartLines: CartLine[]): PricedCart {
   const resolved = cartLines.flatMap((line) => {
     const product = getProduct(line.slug);
-    return product && product.price !== undefined
-      ? [{ line, product: product as Product & { price: number } }]
-      : [];
+    return product && isPurchasable(product) ? [{ line, product }] : [];
   });
 
   const bottleCount = resolved

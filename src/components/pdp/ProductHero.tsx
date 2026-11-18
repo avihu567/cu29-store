@@ -7,6 +7,7 @@ import {
   RING_COLORS,
   SLEEVE_COLORS,
   getProduct,
+  isPurchasable,
   technicalSpecs,
   formatPrice,
   whatsappLink,
@@ -20,6 +21,7 @@ import type { CartLine } from "@/lib/cart";
 import { WhatsAppIcon } from "../icons";
 import QuantitySelector from "../QuantitySelector";
 import Gallery from "./Gallery";
+import NotifyForm from "./NotifyForm";
 import StarRating from "./StarRating";
 import {
   DELIVERY_BUSINESS_DAYS,
@@ -56,17 +58,18 @@ export default function ProductHero({
 
   const title = product.title ?? product.name;
   const price = product.price;
+  const purchasable = isPurchasable(product);
   const ring = color ? RING_COLORS[color] : undefined;
   const accessoryColor = product.colorOptions?.find((c) => c.id === optColor);
   const sleeveProduct = getProduct(SLEEVE_SLUG);
   const bumpAvailable =
-    isBottle(product) && Boolean(product.size) && sleeveProduct?.price !== undefined;
+    isBottle(product) && Boolean(product.size) && Boolean(sleeveProduct && isPurchasable(sleeveProduct));
   const bumpActive = bumpAvailable && bumpOn;
   const sleeveColorName = SLEEVE_COLORS.find((c) => c.id === sleeveColor)?.name;
 
   // What "add to cart" will add — priced with the same rules as the cart.
   const pendingLines: CartLine[] =
-    price === undefined
+    !purchasable
       ? []
       : product.accessory
         ? [{ slug: product.slug, quantity, color: optColor, size: optSize }]
@@ -120,7 +123,8 @@ export default function ProductHero({
             images={imagesBySlug[product.slug] ?? []}
             art={product.art}
             alt={product.name}
-            badge={product.badge}
+            badge={product.isComingSoon ? "בקרוב בקולקציה" : product.badge}
+            placeholder={product.isComingSoon}
             ringColor={accessoryColor?.hex ?? ring?.hex}
           />
         </div>
@@ -145,7 +149,7 @@ export default function ProductHero({
           </a>
 
           <div className="mt-9 flex items-baseline gap-3 border-t border-line/70 pt-9">
-            {price !== undefined ? (
+            {purchasable && price !== undefined ? (
               <>
                 <span className="font-serif text-4xl font-light text-ink">{formatPrice(price)}</span>
                 {product.compareAtPrice && (
@@ -156,7 +160,12 @@ export default function ProductHero({
                 <span className="text-xs text-stone">כולל מע״מ</span>
               </>
             ) : (
-              <span className="text-2xl font-light text-copper-deep">בקרוב</span>
+              <span className="flex items-center gap-3">
+                <span className="rounded-full bg-copper-pale/60 px-3.5 py-1 text-xs tracking-[0.1em] text-copper-deep ring-1 ring-copper/20">
+                  בקרוב בקולקציה
+                </span>
+                <span className="text-lg font-light text-stone">השקה בקרוב</span>
+              </span>
             )}
           </div>
 
@@ -345,8 +354,8 @@ export default function ProductHero({
             </div>
           )}
 
-          <div ref={ctaRef} className="mt-9 space-y-3">
-            {price !== undefined ? (
+          <div ref={ctaRef} id="notify" className="mt-9 scroll-mt-40 space-y-3">
+            {purchasable && price !== undefined ? (
               <>
                 <div className="flex gap-3">
                   <QuantitySelector value={quantity} onChange={setQuantity} />
@@ -369,15 +378,7 @@ export default function ProductHero({
                 </a>
               </>
             ) : (
-              <a
-                href={whatsappLink(`שלום CU29, אשמח לקבל עדכון כשהמוצר "${product.name}" יהיה זמין`)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-copper flex h-13 items-center justify-center gap-2 rounded-full text-sm"
-              >
-                <WhatsAppIcon className="h-5 w-5" />
-                עדכנו אותי כשיגיע
-              </a>
+              <NotifyForm productName={product.name} />
             )}
 
             {added && (
@@ -394,6 +395,7 @@ export default function ProductHero({
           </div>
 
           {/* Shipping summary, linked to the shipping policy */}
+          {purchasable && (
           <p className="mt-6 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-2xl bg-cream/70 px-4 py-3 text-center text-xs text-stone ring-1 ring-line/60">
             <Link href="/shipping" className="underline-offset-4 hover:text-copper-deep hover:underline">
               משלוח עד {DELIVERY_BUSINESS_DAYS} ימי עסקים
@@ -403,6 +405,7 @@ export default function ProductHero({
               משלוח חינם מעל ₪{FREE_SHIPPING_THRESHOLD}
             </Link>
           </p>
+          )}
 
           <div className="mt-8 divide-y divide-line/70 rounded-[var(--radius-card)] bg-paper/70 px-6 ring-1 ring-line/60">
             <Accordion title="על המוצר" defaultOpen>
@@ -433,7 +436,7 @@ export default function ProductHero({
       </div>
 
       {/* Sticky mobile buy bar */}
-      {price !== undefined && (
+      {purchasable && price !== undefined && (
         <div
           className={`fixed inset-x-0 bottom-0 z-30 border-t border-line bg-ivory/95 py-3 pe-4 ps-24 backdrop-blur transition-transform duration-300 lg:hidden ${
             showBar ? "translate-y-0" : "translate-y-full"
