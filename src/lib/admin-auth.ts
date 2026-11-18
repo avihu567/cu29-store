@@ -14,8 +14,11 @@ export const SESSION_SECONDS = 60 * 60 * 12; // 12 hours
  */
 const FALLBACK_ADMIN_PASSWORD = "CU29Admin2026!";
 
+/** Env values pasted as "value" or 'value' (or with spaces/newlines) are cleaned. */
+const cleanEnv = (v: string | undefined) => (v ?? "").trim().replace(/^["']+|["']+$/g, "").trim();
+
 function password(): string {
-  return (process.env.ADMIN_PASSWORD || FALLBACK_ADMIN_PASSWORD).trim();
+  return cleanEnv(process.env.ADMIN_PASSWORD) || FALLBACK_ADMIN_PASSWORD;
 }
 
 export const isAdminConfigured = () => password().length > 0;
