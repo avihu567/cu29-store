@@ -15,12 +15,18 @@ const PRODUCTS_DIR = path.join(process.cwd(), "public", "products");
  * so new photos need a rebuild before they appear on a deployed site.
  */
 export function getProductImages(dir: string): string[] {
+  // "/images/cooling-sleeve" → under /public; "bottles-500ml" → under /public/products
+  const fromPublic = dir.startsWith("/");
+  const diskDir = fromPublic
+    ? path.join(process.cwd(), "public", dir)
+    : path.join(PRODUCTS_DIR, dir);
+  const urlDir = fromPublic ? dir.replace(/\/+$/, "") : `/products/${dir}`;
   try {
     return fs
-      .readdirSync(path.join(PRODUCTS_DIR, dir))
+      .readdirSync(diskDir)
       .filter((f) => IMAGE_EXT.test(f))
       .sort((a, b) => a.localeCompare(b, "en", { numeric: true }))
-      .map((f) => `/products/${dir}/${encodeURIComponent(f)}`);
+      .map((f) => `${urlDir}/${encodeURIComponent(f)}`);
   } catch {
     return [];
   }

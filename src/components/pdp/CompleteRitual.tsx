@@ -69,7 +69,12 @@ export default function CompleteRitual({ product }: { product: Product }) {
               </div>
               <div className="mt-4">
                 {p.price !== undefined ? (
-                  <QuickAddButton slug={p.slug} color={p.ringColors?.[0]} label={p.name} />
+                  <QuickAddButton
+                    slug={p.slug}
+                    color={p.ringColors?.[0] ?? p.colorOptions?.[0]?.id}
+                    size={p.sizeOptions?.[0]}
+                    label={p.name}
+                  />
                 ) : (
                   <a
                     href={whatsappLink(`שלום CU29, אשמח לקבל עדכון כשהמוצר "${p.name}" יהיה זמין`)}

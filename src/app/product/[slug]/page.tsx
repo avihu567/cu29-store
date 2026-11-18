@@ -92,9 +92,9 @@ async function ProductContent({ params }: { params: Promise<{ slug: string }> })
         categoryName={category.name}
         rating={ratingSummary(reviewsFor(product.category))}
       />
-      <BenefitsGrid category={product.category} />
+      {!product.accessory && <BenefitsGrid category={product.category} />}
       <RitualStory />
-      <CareGuide category={product.category} />
+      {!product.accessory && <CareGuide category={product.category} />}
       <ProductReviews category={product.category} productName={product.name} />
       <CompleteRitual product={product} />
       <FinalCta />

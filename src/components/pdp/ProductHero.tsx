@@ -5,14 +5,18 @@ import { useEffect, useRef, useState } from "react";
 import { addToCart } from "@/lib/cart";
 import {
   RING_COLORS,
+  SLEEVE_COLORS,
+  getProduct,
   technicalSpecs,
   formatPrice,
-  orderMessage,
   whatsappLink,
   type GalleryImage,
   type Product,
   type RingColorId,
 } from "@/lib/products";
+import { FREE_RING_VALUE, SLEEVE_BUMP_PRICE, SLEEVE_PRICE, SLEEVE_SLUG } from "@/lib/offers";
+import { buildOrderMessage, isBottle, priceCart } from "@/lib/pricing";
+import type { CartLine } from "@/lib/cart";
 import { WhatsAppIcon } from "../icons";
 import QuantitySelector from "../QuantitySelector";
 import Gallery from "./Gallery";
@@ -43,10 +47,36 @@ export default function ProductHero({
   const [color, setColor] = useState<RingColorId | undefined>(product.ringColors?.[0]);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  // Accessory options (sleeve size/color, ring color)
+  const [optSize, setOptSize] = useState<string | undefined>(product.sizeOptions?.[0]);
+  const [optColor, setOptColor] = useState<string | undefined>(product.colorOptions?.[0]?.id);
+  // Order bump: discounted, size-matched cooling sleeve (bottles only)
+  const [bumpOn, setBumpOn] = useState(false);
+  const [sleeveColor, setSleeveColor] = useState(SLEEVE_COLORS[0].id);
 
   const title = product.title ?? product.name;
   const price = product.price;
   const ring = color ? RING_COLORS[color] : undefined;
+  const accessoryColor = product.colorOptions?.find((c) => c.id === optColor);
+  const sleeveProduct = getProduct(SLEEVE_SLUG);
+  const bumpAvailable =
+    isBottle(product) && Boolean(product.size) && sleeveProduct?.price !== undefined;
+  const bumpActive = bumpAvailable && bumpOn;
+  const sleeveColorName = SLEEVE_COLORS.find((c) => c.id === sleeveColor)?.name;
+
+  // What "add to cart" will add — priced with the same rules as the cart.
+  const pendingLines: CartLine[] =
+    price === undefined
+      ? []
+      : product.accessory
+        ? [{ slug: product.slug, quantity, color: optColor, size: optSize }]
+        : [
+            { slug: product.slug, quantity, color },
+            ...(bumpActive
+              ? [{ slug: SLEEVE_SLUG, quantity, color: sleeveColor, size: product.size, offer: "bump" as const }]
+              : []),
+          ];
+  const pending = priceCart(pendingLines);
 
   function selectSize(next: Product) {
     setSlug(next.slug);
@@ -62,7 +92,7 @@ export default function ProductHero({
   }, [product.name, product.titleEn]);
 
   function add() {
-    addToCart(product.slug, quantity, color);
+    pendingLines.forEach((line) => addToCart(line));
     setAdded(true);
   }
 
@@ -79,9 +109,7 @@ export default function ProductHero({
     return () => io.disconnect();
   }, []);
 
-  const message = orderMessage([{ product, quantity, color }], [
-    price !== undefined ? `סה״כ: ${formatPrice(price * quantity)}` : "",
-  ].filter(Boolean));
+  const message = buildOrderMessage(pending);
 
   return (
     <section id="buy" className="scroll-mt-32">
@@ -93,7 +121,7 @@ export default function ProductHero({
             art={product.art}
             alt={product.name}
             badge={product.badge}
-            ringColor={ring?.hex}
+            ringColor={accessoryColor?.hex ?? ring?.hex}
           />
         </div>
 
@@ -134,6 +162,62 @@ export default function ProductHero({
 
           <p className="text-subtle mt-5 text-lg leading-8 text-ink/80">{product.shortDescription}</p>
 
+          {product.sizeOptions && (
+            <fieldset className="mt-8">
+              <legend className="mb-3 text-sm text-stone">
+                מידה: <span className="text-ink">{optSize}</span>
+              </legend>
+              <div className="flex flex-wrap gap-2">
+                {product.sizeOptions.map((size) => {
+                  const active = size === optSize;
+                  return (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => setOptSize(size)}
+                      aria-pressed={active}
+                      className={`min-w-24 rounded-full border px-5 py-2.5 text-sm transition-colors ${
+                        active
+                          ? "border-ink bg-ink text-ivory"
+                          : "border-line bg-paper/60 text-ink hover:-translate-y-0.5 hover:border-copper/60 hover:shadow-[var(--shadow-soft)]"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
+          )}
+
+          {product.colorOptions && accessoryColor && (
+            <fieldset className="mt-7">
+              <legend className="mb-3 text-sm text-stone">
+                צבע: <span className="text-ink">{accessoryColor.name}</span>
+              </legend>
+              <div className="flex gap-3">
+                {product.colorOptions.map((c) => {
+                  const active = c.id === optColor;
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setOptColor(c.id)}
+                      aria-pressed={active}
+                      aria-label={c.name}
+                      title={c.name}
+                      className={`flex h-11 w-11 items-center justify-center rounded-full border transition ${
+                        active ? "border-ink" : "border-transparent hover:border-stone-muted"
+                      }`}
+                    >
+                      <span className="h-8 w-8 rounded-full shadow-inner" style={{ backgroundColor: c.hex }} />
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
+          )}
+
           {variants.length > 1 && (
             <fieldset className="mt-8">
               <legend className="mb-3 text-sm text-stone">
@@ -169,8 +253,18 @@ export default function ProductHero({
 
           {product.ringColors && ring && (
             <fieldset className="mt-7">
-              <legend className="mb-3 text-sm text-stone">
-                צבע טבעת סיליקון: <span className="text-ink">{ring.name}</span>
+              <legend className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-stone">
+                <span>
+                  צבע טבעת סיליקון: <span className="text-ink">{ring.name}</span>
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full bg-copper-pale/60 px-3 py-1 text-xs text-copper-dark ring-1 ring-copper/20">
+                  <span aria-hidden="true">🎁</span>
+                  כלול במתנה (שווי {FREE_RING_VALUE} ₪)
+                  <span className="text-stone">
+                    <s>{FREE_RING_VALUE} ₪</s>
+                  </span>
+                  <strong className="font-medium text-copper-deep">חינם</strong>
+                </span>
               </legend>
               <div className="flex gap-3">
                 {product.ringColors.map((id) => {
@@ -196,6 +290,61 @@ export default function ProductHero({
             </fieldset>
           )}
 
+          {bumpAvailable && (
+            <div
+              className={`mt-6 rounded-2xl border p-4 transition-colors ${
+                bumpOn ? "border-copper/50 bg-copper-pale/40" : "border-dashed border-copper/40 bg-copper-pale/20"
+              }`}
+            >
+              <label className="flex cursor-pointer items-start gap-3 text-sm leading-6 text-ink">
+                <input
+                  type="checkbox"
+                  checked={bumpOn}
+                  onChange={(e) => setBumpOn(e.target.checked)}
+                  className="mt-1 h-4 w-4 shrink-0 accent-copper"
+                />
+                <span>
+                  הוסף שרוול קירור ממותג תואם מידה ב-{SLEEVE_BUMP_PRICE} ₪ בלבד{" "}
+                  <span className="text-stone">
+                    (במקום <s>{SLEEVE_PRICE} ₪</s>)
+                  </span>
+                </span>
+              </label>
+              {bumpOn && (
+                <div className="mt-4 space-y-3 ps-7">
+                  <p className="text-xs text-stone">
+                    מידה: <span className="text-ink">{product.size}</span> · מותאם אוטומטית לבקבוק שבחרתם
+                  </p>
+                  <fieldset>
+                    <legend className="mb-2 text-xs text-stone">
+                      צבע השרוול: <span className="text-ink">{sleeveColorName}</span>
+                    </legend>
+                    <div className="flex gap-2.5">
+                      {SLEEVE_COLORS.map((c) => {
+                        const active = c.id === sleeveColor;
+                        return (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => setSleeveColor(c.id)}
+                            aria-pressed={active}
+                            aria-label={`שרוול ${c.name}`}
+                            title={c.name}
+                            className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${
+                              active ? "border-ink" : "border-transparent hover:border-stone-muted"
+                            }`}
+                          >
+                            <span className="h-7 w-7 rounded-full shadow-inner" style={{ backgroundColor: c.hex }} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
+                </div>
+              )}
+            </div>
+          )}
+
           <div ref={ctaRef} className="mt-9 space-y-3">
             {price !== undefined ? (
               <>
@@ -206,7 +355,7 @@ export default function ProductHero({
                     onClick={add}
                     className="btn-copper flex-1 rounded-full px-6 text-sm tracking-[0.08em]"
                   >
-                    הוספה לסל · {formatPrice(price * quantity)}
+                    הוספה לסל · {formatPrice(pending.subtotal)}
                   </button>
                 </div>
                 <a
@@ -235,6 +384,8 @@ export default function ProductHero({
               <p role="status" className="flex items-center justify-between rounded-2xl bg-wood-light/60 px-5 py-3 text-sm text-ink">
                 נוסף לסל: {product.name}
                 {ring && ` · ${ring.name}`}
+                {accessoryColor && ` · ${accessoryColor.name}`}
+                {bumpActive && " + שרוול קירור"}
                 <Link href="/cart" className="text-copper-deep underline underline-offset-4">
                   לסל ולתשלום ←
                 </Link>
@@ -292,10 +443,12 @@ export default function ProductHero({
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm text-ink">
-                {product.size ?? product.name}
+                {optSize ?? product.size ?? product.name}
                 {ring && ` · ${ring.name}`}
+                {accessoryColor && ` · ${accessoryColor.name}`}
+                {bumpActive && " + שרוול"}
               </p>
-              <p className="text-sm text-stone">{formatPrice(price * quantity)}</p>
+              <p className="text-sm text-stone">{formatPrice(pending.subtotal)}</p>
             </div>
             <button
               type="button"

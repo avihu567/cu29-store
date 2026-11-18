@@ -2,15 +2,16 @@
 
 import { useState } from "react";
 import { addToCart } from "@/lib/cart";
-import type { RingColorId } from "@/lib/products";
 
 export default function QuickAddButton({
   slug,
   color,
+  size,
   label,
 }: {
   slug: string;
-  color?: RingColorId;
+  color?: string;
+  size?: string;
   label: string;
 }) {
   const [added, setAdded] = useState(false);
@@ -18,7 +19,7 @@ export default function QuickAddButton({
     <button
       type="button"
       onClick={() => {
-        addToCart(slug, 1, color);
+        addToCart({ slug, quantity: 1, color, size });
         setAdded(true);
         setTimeout(() => setAdded(false), 1800);
       }}

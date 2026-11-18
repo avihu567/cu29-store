@@ -3,23 +3,21 @@
 import Link from "next/link";
 import { useId, useRef, useState } from "react";
 import { lineKey, setQuantity, useCart } from "@/lib/cart";
+import { formatPrice, getProduct, SLEEVE_COLORS, whatsappLink } from "@/lib/products";
 import {
-  formatPrice,
-  getProduct,
-  isAvailable,
-  orderMessage,
-  RING_COLORS,
-  whatsappLink,
-} from "@/lib/products";
+  FREE_RING_VALUE,
+  GIFT_SLEEVE_THRESHOLD,
+  SLEEVE_BUMP_PRICE,
+  SLEEVE_PRICE,
+  SLEEVE_SLUG,
+} from "@/lib/offers";
+import { buildOrderMessage, isBottle, lineOptions, priceCart } from "@/lib/pricing";
+import { FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
 import { WhatsAppIcon } from "./icons";
+import ProductArt from "./ProductArt";
 import ProductImage from "./ProductImage";
 import QuantitySelector from "./QuantitySelector";
 import { ButtonLink } from "./ui";
-import {
-  FREE_SHIPPING_THRESHOLD,
-  remainingForFreeShipping,
-  shippingFor,
-} from "@/lib/shipping";
 
 export default function CartView({
   images,
@@ -36,14 +34,15 @@ export default function CartView({
   const marketingId = useId();
   const errorId = useId();
 
-  const items = useCart().flatMap((line) => {
-    const product = getProduct(line.slug);
-    return product && isAvailable(product)
-      ? [{ product, quantity: line.quantity, color: line.color, key: lineKey(line) }]
-      : [];
-  });
+  // Gift sleeve (tier 2) choices; size defaults to the first bottle's size.
+  const [giftSizeChoice, setGiftSize] = useState<string | undefined>();
+  const [giftColor, setGiftColor] = useState(SLEEVE_COLORS[0].id);
 
-  if (items.length === 0) {
+  const cart = priceCart(useCart());
+  const sleeve = getProduct(SLEEVE_SLUG);
+  const sleeveSizes = sleeve?.sizeOptions ?? [];
+
+  if (cart.lines.length === 0) {
     return (
       <div className="mt-12 flex flex-col items-start gap-6 border-t border-line pt-12">
         <p className="text-stone">הסל שלכם ריק כרגע.</p>
@@ -52,18 +51,26 @@ export default function CartView({
     );
   }
 
-  const subtotal = items.reduce((s, i) => s + i.product.price * i.quantity, 0);
-  const shipping = shippingFor(subtotal);
-  const remaining = remainingForFreeShipping(subtotal);
-  const total = subtotal + shipping;
+  const firstBottleSize = cart.lines.find((l) => isBottle(l.product))?.product.size;
+  const giftSize =
+    giftSizeChoice ?? (firstBottleSize && sleeveSizes.includes(firstBottleSize) ? firstBottleSize : sleeveSizes[1] ?? sleeveSizes[0]);
+  const giftColorName = SLEEVE_COLORS.find((c) => c.id === giftColor)?.name ?? "";
+  const giftActive = cart.giftSleeveUnlocked && Boolean(sleeve) && Boolean(giftSize);
 
-  const message = orderMessage(items, [
-    `משלוח: ${shipping === 0 ? "חינם" : formatPrice(shipping)}`,
-    `סה״כ: ${formatPrice(total)}`,
-    "",
-    "✓ קראתי ואני מסכים/ה לתקנון האתר ולמדיניות הביטולים וההחזרות",
-    `עדכונים ומבצעים במייל, SMS ו-WhatsApp: ${marketingOptIn ? "כן, מאשר/ת" : "לא"}`,
-  ]);
+  // Value of everything the customer gets for free or discounted.
+  const savings =
+    cart.bottleCount * FREE_RING_VALUE +
+    cart.lines.reduce((s, l) => s + (l.regularTotal - l.total), 0) +
+    (giftActive ? SLEEVE_PRICE : 0);
+
+  const message = buildOrderMessage(cart, {
+    giftSleeve: giftActive && giftSize ? { size: giftSize, colorName: giftColorName } : undefined,
+    footer: [
+      "",
+      "✓ קראתי ואני מסכים/ה לתקנון האתר ולמדיניות הביטולים וההחזרות",
+      `עדכונים ומבצעים במייל, SMS ו-WhatsApp: ${marketingOptIn ? "כן, מאשר/ת" : "לא"}`,
+    ],
+  });
 
   function guardSubmit(e: React.MouseEvent<HTMLAnchorElement>) {
     if (!agreedToTerms) {
@@ -73,94 +80,216 @@ export default function CartView({
     }
   }
 
+  // Progress bar: 0 → tier 2 (₪310), with a marker at tier 1 (₪250).
+  const progress = Math.min(100, (cart.subtotal / GIFT_SLEEVE_THRESHOLD) * 100);
+  const tier1At = (FREE_SHIPPING_THRESHOLD / GIFT_SLEEVE_THRESHOLD) * 100;
+  const freeShipping = cart.toFreeShipping === 0;
+
   return (
     <div className="mt-10 grid gap-12 lg:grid-cols-[1.6fr_1fr]">
-      <ul className="h-fit divide-y divide-line/70 rounded-[var(--radius-card)] bg-paper/80 px-6 shadow-[var(--shadow-soft)] ring-1 ring-line/60">
-        {items.map(({ product, quantity, color, key }) => (
-          <li key={key} className="flex gap-5 py-6">
-            <Link
-              href={`/product/${product.slug}`}
-              className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-2xl bg-white ring-1 ring-line/60"
-            >
-              <ProductImage
-                src={images[product.slug]}
-                art={product.art}
-                alt={product.name}
-                sizes="96px"
-                padded={false}
-                artClassName="h-full w-auto p-3"
-              />
-            </Link>
-            <div className="flex flex-1 flex-col justify-between gap-3 sm:flex-row sm:items-center">
-              <div>
-                <Link href={`/product/${product.slug}`} className="font-serif text-lg text-ink hover:text-copper">
-                  {product.name}
-                </Link>
-                <p className="text-sm text-stone">
-                  {product.size && <>{product.size} · </>}
-                  {color && <>טבעת {RING_COLORS[color].name} · </>}
-                  {formatPrice(product.price)}
+      <ul className="h-fit min-w-0 divide-y divide-line/70 rounded-[var(--radius-card)] bg-paper/80 px-4 sm:px-6 shadow-[var(--shadow-soft)] ring-1 ring-line/60">
+        {cart.lines.map(({ line, product, total, regularTotal, bumpUnits, freeRing }) => {
+          const key = lineKey(line);
+          const options = lineOptions(product, line);
+          const isBumpLine = line.offer === "bump";
+          return (
+            <li key={key} className="flex gap-4 py-6 sm:gap-5">
+              <Link
+                href={`/product/${product.slug}`}
+                className="relative aspect-square w-20 shrink-0 overflow-hidden rounded-2xl bg-white ring-1 ring-line/60 sm:w-24"
+              >
+                <ProductImage
+                  src={images[product.slug]}
+                  art={product.art}
+                  alt={product.name}
+                  sizes="96px"
+                  padded={false}
+                  artClassName="h-full w-auto p-3"
+                />
+              </Link>
+              <div className="flex min-w-0 flex-1 flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                <div className="min-w-0">
+                  <Link href={`/product/${product.slug}`} className="font-serif text-lg text-ink hover:text-copper">
+                    {product.name}
+                  </Link>
+                  <p className="text-sm text-stone">
+                    {options.length > 0 && <>{options.join(" · ")} · </>}
+                    {isBumpLine && bumpUnits > 0 ? (
+                      <>
+                        {formatPrice(SLEEVE_BUMP_PRICE)} <s>{formatPrice(SLEEVE_PRICE)}</s>
+                      </>
+                    ) : (
+                      formatPrice(product.price)
+                    )}
+                  </p>
+                  {isBumpLine && bumpUnits < line.quantity && (
+                    <p className="mt-1 text-xs text-copper-dark">
+                      {bumpUnits === 0
+                        ? `המחיר המוזל (${formatPrice(SLEEVE_BUMP_PRICE)}) זמין עם רכישת בקבוק`
+                        : `המחיר המוזל חל על שרוול אחד לכל בקבוק בסל`}
+                    </p>
+                  )}
+                  {freeRing && (
+                    <p className="mt-1.5 inline-flex flex-wrap items-center gap-x-1.5 rounded-full bg-copper-pale/50 px-3 py-1 text-xs text-copper-dark">
+                      <span aria-hidden="true">🎁</span>
+                      טבעת נשיאה מסיליקון · {freeRing}
+                      {line.quantity > 1 && ` × ${line.quantity}`} — חינם
+                      <span className="text-stone">
+                        (שווי <s>{formatPrice(FREE_RING_VALUE)}</s>)
+                      </span>
+                    </p>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                  <QuantitySelector size="sm" value={line.quantity} onChange={(q) => setQuantity(key, q)} />
+                  <span className="w-16 text-end text-sm text-ink">
+                    {formatPrice(total)}
+                    {regularTotal > total && (
+                      <s className="block text-xs text-stone">{formatPrice(regularTotal)}</s>
+                    )}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setQuantity(key, 0)}
+                    className="text-xs text-stone underline-offset-4 hover:text-copper hover:underline"
+                  >
+                    הסרה
+                  </button>
+                </div>
+              </div>
+            </li>
+          );
+        })}
+
+        {giftActive && sleeve && (
+          <li className="flex gap-4 py-6 sm:gap-5">
+            <div className="relative flex aspect-square w-20 shrink-0 sm:w-24 items-center justify-center overflow-hidden rounded-2xl bg-white ring-1 ring-copper/40">
+              {images[SLEEVE_SLUG] ? (
+                <ProductImage src={images[SLEEVE_SLUG]} art="sleeve" alt={sleeve.name} sizes="96px" padded={false} />
+              ) : (
+                <ProductArt
+                  variant="sleeve"
+                  ringColor={SLEEVE_COLORS.find((c) => c.id === giftColor)?.hex}
+                  className="h-full w-auto p-3"
+                />
+              )}
+            </div>
+            <div className="min-w-0 flex-1 space-y-3">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <p className="font-serif text-lg text-ink">
+                  <span aria-hidden="true">🎁 </span>
+                  {sleeve.name} · במתנה
+                </p>
+                <p className="text-sm text-copper-deep">
+                  חינם <s className="text-xs text-stone">{formatPrice(SLEEVE_PRICE)}</s>
                 </p>
               </div>
-              <div className="flex items-center gap-5">
-                <QuantitySelector
-                  size="sm"
-                  value={quantity}
-                  onChange={(q) => setQuantity(product.slug, q, color)}
-                />
-                <span className="w-16 text-end text-sm text-ink">
-                  {formatPrice(product.price * quantity)}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setQuantity(product.slug, 0, color)}
-                  className="text-xs text-stone underline-offset-4 hover:text-copper hover:underline"
-                >
-                  הסרה
-                </button>
-              </div>
+              <fieldset>
+                <legend className="mb-1.5 text-xs text-stone">
+                  מידה: <span className="text-ink">{giftSize}</span>
+                </legend>
+                <div className="flex flex-wrap gap-1.5">
+                  {sleeveSizes.map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => setGiftSize(size)}
+                      aria-pressed={size === giftSize}
+                      className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                        size === giftSize ? "border-ink bg-ink text-ivory" : "border-line bg-paper text-ink hover:border-copper/60"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+              <fieldset>
+                <legend className="mb-1.5 text-xs text-stone">
+                  צבע: <span className="text-ink">{giftColorName}</span>
+                </legend>
+                <div className="flex gap-2">
+                  {SLEEVE_COLORS.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setGiftColor(c.id)}
+                      aria-pressed={c.id === giftColor}
+                      aria-label={`שרוול מתנה ${c.name}`}
+                      title={c.name}
+                      className={`flex h-8 w-8 items-center justify-center rounded-full border transition ${
+                        c.id === giftColor ? "border-ink" : "border-transparent hover:border-stone-muted"
+                      }`}
+                    >
+                      <span className="h-6 w-6 rounded-full shadow-inner" style={{ backgroundColor: c.hex }} />
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
             </div>
           </li>
-        ))}
+        )}
       </ul>
 
-      <aside className="h-fit space-y-4 rounded-[var(--radius-card)] bg-cream p-8 shadow-[var(--shadow-soft)] ring-1 ring-line/60">
+      <aside className="h-fit min-w-0 space-y-4 rounded-[var(--radius-card)] bg-cream p-6 sm:p-8 shadow-[var(--shadow-soft)] ring-1 ring-line/60">
         <h2 className="font-serif text-2xl text-ink">סיכום הזמנה</h2>
         <dl className="space-y-3 border-b border-line pb-4 text-sm">
           <div className="flex justify-between">
             <dt className="text-stone">סכום ביניים</dt>
-            <dd>{formatPrice(subtotal)}</dd>
+            <dd>{formatPrice(cart.subtotal)}</dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-stone">משלוח</dt>
-            <dd>{shipping === 0 ? "חינם" : formatPrice(shipping)}</dd>
+            <dd>{cart.shipping === 0 ? "חינם" : formatPrice(cart.shipping)}</dd>
           </div>
-        </dl>
-        {remaining > 0 ? (
-          <div className="space-y-2">
-            <p className="text-sm text-copper-dark">
-              נותרו לך {formatPrice(remaining)} למשלוח חינם
-            </p>
-            <div
-              className="h-1.5 overflow-hidden rounded-full bg-sand"
-              role="progressbar"
-              aria-label="התקדמות למשלוח חינם"
-              aria-valuemin={0}
-              aria-valuemax={FREE_SHIPPING_THRESHOLD}
-              aria-valuenow={subtotal}
-            >
-              <div
-                className="h-full rounded-full bg-copper transition-all duration-500"
-                style={{ width: `${Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100)}%` }}
-              />
+          {savings > 0 && (
+            <div className="flex justify-between text-copper-deep">
+              <dt>🎁 שווי ההטבות בהזמנה</dt>
+              <dd>{formatPrice(savings)}</dd>
             </div>
+          )}
+        </dl>
+
+        {/* Two-tier progress: free shipping (₪250) → free sleeve (₪310) */}
+        <div className="space-y-3">
+          <p className="text-sm text-copper-dark">
+            {!freeShipping
+              ? `נותרו לך ${formatPrice(cart.toFreeShipping)} למשלוח חינם`
+              : !cart.giftSleeveUnlocked
+                ? `✓ משלוח חינם · נותרו לך ${formatPrice(cart.toGiftSleeve)} לשרוול קירור במתנה`
+                : "✓ משלוח חינם ושרוול קירור במתנה!"}
+          </p>
+          <div
+            className="relative h-2 rounded-full bg-sand"
+            role="progressbar"
+            aria-label="התקדמות להטבות: משלוח חינם ושרוול קירור במתנה"
+            aria-valuemin={0}
+            aria-valuemax={GIFT_SLEEVE_THRESHOLD}
+            aria-valuenow={Math.min(cart.subtotal, GIFT_SLEEVE_THRESHOLD)}
+          >
+            <div
+              className="h-full rounded-full bg-copper transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
+            <span
+              className={`absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 translate-x-1/2 rounded-full border-2 border-cream ${freeShipping ? "bg-copper" : "bg-stone-muted"}`}
+              style={{ insetInlineStart: `${tier1At}%` }}
+              aria-hidden="true"
+            />
           </div>
-        ) : (
-          <p className="text-sm text-copper-dark">✓ ההזמנה שלך זכאית למשלוח חינם</p>
-        )}
+          <ul className="grid grid-cols-2 gap-2 text-xs">
+            <li className={freeShipping ? "text-copper-deep" : "text-stone"}>
+              {freeShipping ? "✓ " : ""}משלוח חינם בקנייה מעל {FREE_SHIPPING_THRESHOLD} ₪
+            </li>
+            <li className={`text-end ${cart.giftSleeveUnlocked ? "text-copper-deep" : "text-stone"}`}>
+              {cart.giftSleeveUnlocked ? "✓ " : ""}שרוול קירור במתנה בקנייה מעל {GIFT_SLEEVE_THRESHOLD} ₪
+            </li>
+          </ul>
+        </div>
+
         <div className="flex justify-between font-serif text-xl">
           <span>סה״כ</span>
-          <span>{formatPrice(total)}</span>
+          <span>{formatPrice(cart.total)}</span>
         </div>
         {/* Checkout consent */}
         <fieldset className="space-y-3 border-t border-line pt-5 text-sm leading-6">

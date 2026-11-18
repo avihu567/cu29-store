@@ -1,3 +1,5 @@
+import { RING_PRICE, RING_SLUG, SLEEVE_PRICE, SLEEVE_SLUG } from "./offers";
+
 export type CategoryId = "bottles" | "vessels" | "cups" | "jewelry";
 
 export type ArtVariant =
@@ -6,7 +8,9 @@ export type ArtVariant =
   | "bottle-small"
   | "dispenser"
   | "tumbler"
-  | "bracelet";
+  | "bracelet"
+  | "sleeve"
+  | "carry-ring";
 
 export interface Category {
   id: CategoryId;
@@ -31,6 +35,20 @@ export const RING_COLORS: Record<RingColorId, RingColor> = {
   charcoal: { id: "charcoal", name: "פחם", pantone: "Pantone 426 C", hex: "#25282A" },
   terracotta: { id: "terracotta", name: "ורוד עתיק", pantone: "Pantone 7516 C", hex: "#9A3A06" },
 };
+
+/** A color choice on an accessory (sleeve, ring). */
+export interface ColorOption {
+  id: string;
+  name: string;
+  /** Screen approximation of the color. */
+  hex: string;
+}
+
+/** Cooling sleeve colors. */
+export const SLEEVE_COLORS: ColorOption[] = [
+  { id: "pink", name: "ורוד", hex: "#E2B4AA" },
+  { id: "gray", name: "אפור", hex: "#A5A19B" },
+];
 
 export interface ProductDimensions {
   volumeMl: number;
@@ -61,7 +79,11 @@ export interface Product {
   ringColors?: RingColorId[];
   subtitle: string;
   category: CategoryId;
-  /** Folder under /public/products/ that holds this product's photos. */
+  /**
+   * Folder that holds this product's photos: a name under /public/products/
+   * (e.g. "bottles-500ml"), or a path from /public starting with "/"
+   * (e.g. "/images/cooling-sleeve"). Empty folder → vector art fallback.
+   */
   imageDir: string;
   /**
    * Explicit, ordered photo gallery (position 1 = main image, also used on
@@ -88,6 +110,11 @@ export interface Product {
   dimensions?: ProductDimensions;
   /** Additional spec rows (shown after the generated dimension rows). */
   specs: SpecRow[];
+  /** Accessory options (chosen on the product page, stored on the cart line). */
+  sizeOptions?: string[];
+  colorOptions?: ColorOption[];
+  /** Accessories skip the copper benefit/care sections on their page. */
+  accessory?: boolean;
 }
 
 export const WHATSAPP_NUMBER = "972508898101";
@@ -101,31 +128,6 @@ export function isAvailable(p: Product): p is Product & { price: number } {
   return p.price !== undefined;
 }
 
-export interface OrderLine {
-  product: Product;
-  quantity: number;
-  color?: RingColorId;
-}
-
-/** WhatsApp order text for one or more lines, including size and color. */
-export function orderMessage(lines: OrderLine[], footer: string[] = []): string {
-  return [
-    "שלום CU29, אשמח להזמין:",
-    ...lines.map(({ product, quantity, color }) =>
-      [
-        `• ${product.name}`,
-        product.size ? `מידה: ${product.size}` : "",
-        color ? `טבעת סיליקון: ${RING_COLORS[color].name}` : "",
-        `כמות: ${quantity}`,
-        product.price !== undefined ? formatPrice(product.price * quantity) : "",
-      ]
-        .filter(Boolean)
-        .join(" | "),
-    ),
-    ...footer,
-  ].join("\n");
-}
-
 export function formatPrice(value: number): string {
   return `₪${value.toLocaleString("he-IL")}`;
 }
@@ -134,7 +136,7 @@ export const categories: Category[] = [
   {
     id: "bottles",
     name: "בקבוקי נחושת",
-    tagline: "בשלוש מידות: 500, 700 ו־950 מ״ל",
+    tagline: "בשלוש מידות: 500, 700 ו־950 מ״ל, ואביזרים תואמים",
     art: "bottle",
   },
   {
@@ -245,6 +247,51 @@ export const products: Product[] = [
     description: bottleDescription,
     dimensions: { volumeMl: 950, heightCm: 26, diameterCm: 7 },
     specs: [NO_LINING, RING_SPEC],
+  },
+  {
+    slug: SLEEVE_SLUG,
+    name: "שרוול קירור ממותג CU29",
+    titleEn: "The Cooling Sleeve",
+    subtitle: "שרוול תואם מידה לבקבוקי CU29",
+    category: "bottles",
+    imageDir: "/images/cooling-sleeve",
+    price: SLEEVE_PRICE,
+    art: "sleeve",
+    accessory: true,
+    sizeOptions: ["500 מ״ל", "700 מ״ל", "950 מ״ל"],
+    colorOptions: SLEEVE_COLORS,
+    // TODO(copy): draft description — please review and add the material.
+    shortDescription: "שרוול ממותג שעוטף את בקבוק הנחושת, שומר על המים קרירים יותר ומגן על הבקבוק בדרכים.",
+    description: [
+      "שרוול הקירור של CU29 נתפר במידה מדויקת לכל אחד מבקבוקי הנחושת שלנו – 500, 700 ו־950 מ״ל.",
+      "בחרו את המידה של הבקבוק שלכם ואת הצבע שמתאים לכם.",
+    ],
+    specs: [
+      { label: "התאמה", value: "לבקבוקי CU29 בנפח 500, 700 ו־950 מ״ל" },
+      { label: "צבעים", value: "ורוד, אפור" },
+    ],
+  },
+  {
+    slug: RING_SLUG,
+    name: "טבעת נשיאה מסיליקון",
+    titleEn: "The Carry Ring",
+    subtitle: "טבעת נשיאה לבקבוקי CU29",
+    category: "bottles",
+    imageDir: "/images/silicone-ring",
+    price: RING_PRICE,
+    art: "carry-ring",
+    accessory: true,
+    colorOptions: Object.values(RING_COLORS).map(({ id, name, hex }) => ({ id, name, hex })),
+    // TODO(copy): draft description — please review.
+    shortDescription: "טבעת סיליקון נוחה שמתלבשת על צוואר הבקבוק ומאפשרת לשאת אותו בקלות. כל בקבוק CU29 מגיע עם טבעת אחת במתנה.",
+    description: [
+      "טבעת נשיאה מסיליקון לבקבוקי CU29 – לטבעת נוספת, להחלפה או לשינוי צבע.",
+      "כל בקבוק CU29 כבר כולל טבעת אחת במתנה, בצבע לבחירתכם.",
+    ],
+    specs: [
+      { label: "התאמה", value: "לבקבוקי CU29" },
+      { label: "צבעים", value: "פחם, ורוד עתיק" },
+    ],
   },
   {
     slug: "copper-water-vessel-4l",

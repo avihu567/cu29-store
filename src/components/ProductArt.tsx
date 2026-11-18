@@ -112,5 +112,33 @@ function Shape({ variant, id, ring }: { variant: ArtVariant; id: string; ring?: 
           <path d="M44 162a62 26 0 0 0 112 0" fill="none" stroke="#fff" strokeWidth="3" opacity="0.35" />
         </g>
       );
+    case "sleeve": {
+      // Copper bottle wearing a fabric cooling sleeve (color = `ring`).
+      const sleeve = ring ?? "#A5A19B";
+      return (
+        <g>
+          <rect x="86" y="14" width="28" height="30" rx="5" fill={dark} />
+          <path d="M88 46h24v10c14 6 22 14 22 30v128c0 12-8 20-20 20H86c-12 0-20-8-20-20V86c0-16 8-24 22-30Z" fill={body} />
+          <rect x="62" y="98" width="76" height="120" rx="16" fill={sleeve} />
+          <rect x="62" y="98" width="76" height="120" rx="16" fill="#000" opacity="0.06" />
+          <path d="M70 108h60M70 208h60" stroke="#fff" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.55" />
+          <rect x="84" y="140" width="32" height="26" rx="3" fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.7" />
+          <text x="100" y="158" textAnchor="middle" fontSize="11" fontFamily="Georgia, serif" fill="#fff" opacity="0.8">CU</text>
+          <rect x="72" y="104" width="6" height="104" rx="3" fill="#fff" opacity="0.18" />
+        </g>
+      );
+    }
+    case "carry-ring": {
+      // Silicone carry ring: a collar with a finger loop (color = `ring`).
+      const silicone = ring ?? "#25282A";
+      return (
+        <g>
+          <ellipse cx="100" cy="92" rx="40" ry="13" fill="none" stroke={silicone} strokeWidth="13" />
+          <path d="M68 100C38 150 58 212 100 214c42-2 62-64 32-114" fill="none" stroke={silicone} strokeWidth="13" strokeLinecap="round" />
+          <path d="M74 112C56 150 70 198 100 200" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" opacity="0.25" />
+          <path d="M70 86a40 13 0 0 1 60 -4" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" opacity="0.25" />
+        </g>
+      );
+    }
   }
 }
