@@ -1,40 +1,44 @@
 @import "tailwindcss";
 
 /*
- * CU29 — earthy, artisanal palette.
- * Linen and rich sand for surfaces, terracotta and stone undertones,
- * tobacco browns for depth, copper as the glowing accent. Nothing clinical.
+ * CU29 — palette taken from the official packaging.
+ *   White & warm alabaster  #FFFFFF / #FBF9F7  page and soft surfaces
+ *   Packaging clay          #C99E8E            cards, sections, borders (as light tints)
+ *   Brushed copper          #B5785C            CTAs, active states (hover #9E6348)
+ *   Antique dark brown      #4A3226            text, announcement bar, footer
+ * Tints below are the clay / brown pre-mixed on white, so they stay solid
+ * (and text contrast predictable) on any surface.
  */
 @theme {
   /* Surfaces (light → deeper) */
-  --color-paper: #f6efe4; /* unbleached paper: cards */
-  --color-ivory: #ffffff; /* the page: pure white */
-  --color-cream: #e9dccb; /* rich sand: sections */
-  --color-sand: #ddcbb4;
-  --color-terra: #e6cbb5; /* soft terracotta wash */
-  --color-stone-warm: #d5c6b2; /* tactile stone */
-  --color-line: #d8c6ae; /* hand-drawn sandy line */
-  --color-stone-muted: #c4ae94;
-  --color-wood-light: #dccab2;
-  --color-wood: #9a774f;
+  --color-ivory: #ffffff; /* the page: crisp white */
+  --color-paper: #fbf9f7; /* warm alabaster: cards, soft surfaces */
+  --color-cream: #f4ece8; /* clay /20: sections, summary panels */
+  --color-terra: #efe2dd; /* clay /30: stronger clay wash */
+  --color-sand: #ecddd8; /* clay /35: tracks, skeletons, quiet fills */
+  --color-wood-light: #f2e7e3; /* clay /25: info strips */
+  --color-stone-warm: #e9d8d2; /* clay /40 */
+  --color-line: #e4cec6; /* clay /50: soft borders and dividers */
+  --color-stone-muted: #c99e8e; /* clay: placeholders, inactive dots */
+  --color-clay: #c99e8e; /* packaging clay (muted blush-terracotta) */
+  --color-wood: #9c7a6b;
 
   /* Text */
-  --color-ink: #2c221e; /* warm charcoal-tobacco, never pure black */
-  --color-stone: #6e5a4a;
+  --color-ink: #4a3226; /* antique dark brown — replaces black */
+  --color-stone: #6e5b51; /* antique brown /80 on white: muted text */
 
-  /* Depth: warm tobacco browns instead of black/grey */
-  --color-tobacco: #5b3f2c;
-  --color-tobacco-deep: #33241a;
+  /* Depth */
+  --color-tobacco: #5c4033; /* hover for dark surfaces */
+  --color-tobacco-deep: #4a3226; /* announcement bar, footer, dark bands */
   --color-charcoal: #25282a; /* Pantone 426 C — ring swatch only */
+  --color-terracotta: #9a3a06; /* Pantone 7516 C — ring swatch only */
 
-  /* Accents */
-  --color-clay: #b8694c;
-  --color-terracotta: #9a3a06; /* Pantone 7516 C — ring swatch */
-  --color-copper: #b87333;
-  --color-copper-deep: #ad5f2b;
-  --color-copper-dark: #8e4f22;
-  --color-copper-light: #d9a272;
-  --color-copper-pale: #edd2b9;
+  /* Brushed copper */
+  --color-copper: #b5785c; /* CTAs, active states, progress fills */
+  --color-copper-deep: #9e6348; /* hover, copper text on light surfaces */
+  --color-copper-dark: #86523b; /* small copper text (highest contrast) */
+  --color-copper-light: #d9ae98; /* copper on dark brown */
+  --color-copper-pale: #ebd5ca; /* pale copper wash / text on dark brown */
 
   /* One soft, rounded family for everything (Hebrew + Latin). "font-serif" in
      components now means "heading voice" and maps to the same family. */
@@ -48,9 +52,9 @@
   --radius-organic: 2.75rem 2rem 3rem 2.25rem / 2.25rem 2.9rem 2rem 2.6rem;
 
   /* Warm, low shadows (brown, not grey) */
-  --shadow-soft: 0 24px 50px -32px rgb(91 63 44 / 0.45);
-  --shadow-lift: 0 34px 70px -34px rgb(91 63 44 / 0.6);
-  --shadow-glow: 0 16px 36px -14px rgb(173 95 43 / 0.65);
+  --shadow-soft: 0 24px 50px -32px rgb(74 50 38 / 0.38);
+  --shadow-lift: 0 34px 70px -34px rgb(74 50 38 / 0.5);
+  --shadow-glow: 0 16px 36px -14px rgb(158 99 72 / 0.6);
 }
 
 /* ───────── Typography: airy, editorial headings ───────── */
@@ -91,12 +95,14 @@ p {
   letter-spacing: 0.01em;
 }
 
-/* ───────── Copper buttons: a slow metallic sweep on hover ───────── */
+/* ───────── Copper buttons: brushed copper, sweeping to #9E6348 on hover ───────── */
 .btn-copper {
-  background-image: linear-gradient(115deg, #d08f55 0%, #b87333 38%, #a35a28 70%, #c98447 100%);
+  background-color: var(--color-copper);
+  background-image: linear-gradient(115deg, #c08a70 0%, #b5785c 30%, #b5785c 48%, #9e6348 62%, #9e6348 100%);
   background-size: 220% 100%;
   background-position: 0% 50%;
-  color: var(--color-paper);
+  color: #ffffff;
+  font-weight: 500;
   box-shadow: var(--shadow-glow);
   transition:
     background-position 0.7s ease,
@@ -106,7 +112,7 @@ p {
 .btn-copper:hover {
   background-position: 100% 50%;
   transform: translateY(-2px);
-  box-shadow: 0 22px 44px -16px rgb(173 95 43 / 0.75);
+  box-shadow: 0 22px 44px -16px rgb(158 99 72 / 0.7);
 }
 .btn-copper:active {
   transform: translateY(0);
@@ -141,25 +147,25 @@ p {
 /* Gentle warm glows for "earthy undertone" sections */
 .warm-glow {
   background-image:
-    radial-gradient(60% 50% at 100% 0%, rgb(241 223 204 / 0.7), transparent 70%),
-    radial-gradient(50% 45% at 0% 100%, rgb(230 217 199 / 0.6), transparent 70%);
+    radial-gradient(60% 50% at 100% 0%, rgb(239 226 221 / 0.7), transparent 70%),
+    radial-gradient(50% 45% at 0% 100%, rgb(244 236 232 / 0.7), transparent 70%);
 }
 
 /* ───────── Tactile surfaces ───────── */
 /* Mottled stone: soft patches of sand, clay and shade */
 .texture-stone {
   background-image:
-    radial-gradient(38% 30% at 18% 22%, rgb(255 246 232 / 0.55), transparent 70%),
-    radial-gradient(30% 26% at 82% 30%, rgb(196 140 102 / 0.14), transparent 70%),
-    radial-gradient(42% 34% at 70% 85%, rgb(120 88 60 / 0.1), transparent 70%),
-    radial-gradient(26% 22% at 30% 78%, rgb(230 203 181 / 0.6), transparent 70%);
+    radial-gradient(38% 30% at 18% 22%, rgb(251 249 247 / 0.6), transparent 70%),
+    radial-gradient(30% 26% at 82% 30%, rgb(201 158 142 / 0.16), transparent 70%),
+    radial-gradient(42% 34% at 70% 85%, rgb(74 50 38 / 0.07), transparent 70%),
+    radial-gradient(26% 22% at 30% 78%, rgb(239 226 221 / 0.6), transparent 70%);
 }
 /* Terracotta clay wash with a faint fired-earth warmth */
 .texture-clay {
   background-color: var(--color-terra);
   background-image:
-    radial-gradient(60% 50% at 85% 10%, rgb(249 232 214 / 0.7), transparent 70%),
-    radial-gradient(45% 40% at 10% 90%, rgb(170 92 58 / 0.16), transparent 70%);
+    radial-gradient(60% 50% at 85% 10%, rgb(251 249 247 / 0.7), transparent 70%),
+    radial-gradient(45% 40% at 10% 90%, rgb(201 158 142 / 0.22), transparent 70%);
 }
 .radius-organic {
   border-radius: var(--radius-organic);

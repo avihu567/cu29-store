@@ -1,6 +1,5 @@
 import Link from "next/link";
 import BrandMark from "./BrandMark";
-import Logo from "./Logo";
 import OrganicDivider from "./OrganicDivider";
 import { POLICY_LINKS } from "./legal/LegalPage";
 import { WHATSAPP_DISPLAY, categories, whatsappLink } from "@/lib/products";
@@ -40,12 +39,11 @@ export default function Footer() {
         <p className="font-display text-center text-4xl text-ivory sm:text-start sm:text-6xl" dir="ltr">
           Pure Flow. <span className="text-copper-glow">Pure Metal.</span>
         </p>
-        <BrandMark logo="seal" decorative className="h-28 animate-slow-spin text-copper-light/80" />
+        <BrandMark logo="mark" className="h-16 text-ivory sm:h-20" />
       </div>
-      <OrganicDivider light className="mx-auto max-w-7xl px-5" />
+      <OrganicDivider light mark={false} className="mx-auto max-w-7xl px-5" />
       <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-8 md:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1.15fr] lg:px-10">
         <div className="space-y-5">
-          <Logo light size="lg" />
           <p className="max-w-xs text-sm leading-7">
             כלים מנחושת טהורה 99.9%, בהשראת המסורת האיורוודית.
           </p>

@@ -14,7 +14,7 @@ export default function OrganicDivider({
   light?: boolean;
   mark?: boolean;
 }) {
-  const stroke = light ? "rgb(217 162 114 / 0.45)" : "rgb(184 115 51 / 0.35)";
+  const stroke = light ? "rgb(217 174 152 / 0.45)" : "rgb(181 120 92 / 0.35)";
   const id = light ? "od-fade-light" : "od-fade";
 
   return (

@@ -361,7 +361,7 @@ export default function RitualPage() {
                   {shineRecipe.map((r, i) => (
                     <li key={r.title} className="rounded-3xl bg-cream/70 p-5 ring-1 ring-line/50">
                       <div className="flex items-center justify-between">
-                        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-paper text-[#8C583A] ring-1 ring-copper/20">
+                        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-paper text-copper-deep ring-1 ring-copper/20">
                           <r.Icon />
                         </span>
                         <span className="font-display text-2xl italic text-copper/50" dir="ltr">

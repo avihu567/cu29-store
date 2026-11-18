@@ -30,7 +30,7 @@ export default function LifestylePhoto({
         sizes={sizes}
         className={`object-cover ${className}`}
       />
-      {tint && <div className="pointer-events-none absolute inset-0 bg-[#c9a27a]/10 mix-blend-multiply" />}
+      {tint && <div className="pointer-events-none absolute inset-0 bg-clay/10 mix-blend-multiply" />}
     </>
   );
 }

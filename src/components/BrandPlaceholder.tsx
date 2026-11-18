@@ -17,7 +17,7 @@ export default function BrandPlaceholder({
   const word = { sm: "text-[8px] tracking-[0.35em]", md: "text-[10px] tracking-[0.45em]", lg: "text-xs tracking-[0.5em]" }[size];
 
   return (
-    <div className="texture-stone absolute inset-0 flex flex-col items-center justify-center bg-[#EFE5D7]">
+    <div className="texture-stone absolute inset-0 flex flex-col items-center justify-center bg-cream">
       {/* fine inner frame */}
       <div className="pointer-events-none absolute inset-3 rounded-[inherit] border border-tobacco/10 sm:inset-4" />
       <BrandMark logo="mark" decorative className={`${mark} text-tobacco/35`} />

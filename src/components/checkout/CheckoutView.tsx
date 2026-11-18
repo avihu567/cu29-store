@@ -26,7 +26,7 @@ function StepBadge({ n, done, active }: { n: number; done: boolean; active: bool
   return (
     <span
       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm ${
-        done ? "bg-copper text-ivory" : active ? "bg-ink text-ivory" : "bg-sand/70 text-stone"
+        done ? "bg-copper-deep text-ivory" : active ? "bg-copper text-ivory" : "bg-sand text-stone"
       }`}
       aria-hidden="true"
     >

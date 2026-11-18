@@ -28,7 +28,7 @@ export default function CareGuide({ category }: { category: CategoryId }) {
             כמה דקות של טיפול עדין ישמרו עליה יפה לשנים.
           </p>
           <div className="mt-8 flex items-center gap-4 rounded-3xl bg-wood-light/50 p-5">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-paper text-[#8C583A] ring-1 ring-copper/20">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-paper text-copper-deep ring-1 ring-copper/20">
               <LemonIcon />
             </span>
             <p className="text-sm leading-6 text-ink">
