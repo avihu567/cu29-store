@@ -23,7 +23,7 @@ export interface PixelContent {
   item_price?: number;
 }
 
-type StandardEvent = "PageView" | "ViewContent" | "AddToCart" | "InitiateCheckout" | "Contact";
+type StandardEvent = "PageView" | "ViewContent" | "AddToCart" | "InitiateCheckout" | "Contact" | "Purchase";
 
 function track(event: StandardEvent, params?: Record<string, unknown>) {
   if (typeof window === "undefined" || typeof window.fbq !== "function") return;
@@ -81,4 +81,27 @@ export function initiateCheckout({ contents, value }: { contents: PixelContent[]
 /** Contact — the user opens a WhatsApp conversation. `value` = cart total when there is one. */
 export function contact(value?: number) {
   track("Contact", value !== undefined && value > 0 ? { value, currency: CURRENCY } : undefined);
+}
+
+/** Purchase — a payment was captured. `orderId` doubles as the event ID (deduplication). */
+export function purchase({
+  contents,
+  value,
+  orderId,
+}: {
+  contents: PixelContent[];
+  value: number;
+  orderId?: string;
+}) {
+  if (typeof window === "undefined" || typeof window.fbq !== "function") return;
+  const params = {
+    content_ids: contents.map((c) => c.id),
+    content_type: "product",
+    contents,
+    num_items: contents.reduce((n, c) => n + c.quantity, 0),
+    value,
+    currency: CURRENCY,
+  };
+  if (orderId) window.fbq("track", "Purchase", params, { eventID: orderId });
+  else window.fbq("track", "Purchase", params);
 }

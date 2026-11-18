@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useId, useRef, useState } from "react";
-import { lineKey, setQuantity, useCart } from "@/lib/cart";
+import { lineKey, setGiftSleevePick, setQuantity, useCart, useGiftSleevePick } from "@/lib/cart";
 import { formatPrice, getProduct, SLEEVE_COLORS, whatsappLink } from "@/lib/products";
 import {
   FREE_RING_VALUE,
@@ -11,7 +11,7 @@ import {
   SLEEVE_PRICE,
   SLEEVE_SLUG,
 } from "@/lib/offers";
-import { buildOrderMessage, isBottle, lineOptions, pixelContents, priceCart } from "@/lib/pricing";
+import { buildOrderMessage, lineOptions, pixelContents, priceCart, resolveGiftSleeve } from "@/lib/pricing";
 import * as fpixel from "@/lib/fpixel";
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
 import { WhatsAppIcon } from "./icons";
@@ -35,13 +35,13 @@ export default function CartView({
   const marketingId = useId();
   const errorId = useId();
 
-  // Gift sleeve (tier 2) choices; size defaults to the first bottle's size.
-  const [giftSizeChoice, setGiftSize] = useState<string | undefined>();
-  const [giftColor, setGiftColor] = useState(SLEEVE_COLORS[0].id);
-
   const cart = priceCart(useCart());
   const sleeve = getProduct(SLEEVE_SLUG);
-  const sleeveSizes = sleeve?.sizeOptions ?? [];
+  // Gift sleeve (tier 2) choice, shared with /checkout; size defaults to the first bottle's size.
+  const gift = resolveGiftSleeve(cart, useGiftSleevePick());
+  const sleeveSizes = gift?.sizes ?? [];
+  const setGiftSize = (size: string) => setGiftSleevePick({ size });
+  const setGiftColor = (color: string) => setGiftSleevePick({ color });
 
   if (cart.lines.length === 0) {
     return (
@@ -52,10 +52,9 @@ export default function CartView({
     );
   }
 
-  const firstBottleSize = cart.lines.find((l) => isBottle(l.product))?.product.size;
-  const giftSize =
-    giftSizeChoice ?? (firstBottleSize && sleeveSizes.includes(firstBottleSize) ? firstBottleSize : sleeveSizes[1] ?? sleeveSizes[0]);
-  const giftColorName = SLEEVE_COLORS.find((c) => c.id === giftColor)?.name ?? "";
+  const giftSize = gift?.size;
+  const giftColor = gift?.colorId;
+  const giftColorName = gift?.colorName ?? "";
   const giftActive = cart.giftSleeveUnlocked && Boolean(sleeve) && Boolean(giftSize);
 
   // Value of everything the customer gets for free or discounted.
@@ -296,6 +295,20 @@ export default function CartView({
           <span>סה״כ</span>
           <span>{formatPrice(cart.total)}</span>
         </div>
+
+        <Link
+          href="/checkout"
+          onClick={() => fpixel.initiateCheckout({ contents: pixelContents(cart), value: cart.total })}
+          className="btn-copper flex w-full items-center justify-center gap-2 rounded-full px-6 py-4 text-sm tracking-[0.08em]"
+        >
+          המשך לתשלום
+          <span aria-hidden="true">←</span>
+        </Link>
+        <p className="text-center text-xs text-stone">PayPal · כרטיס אשראי · תשלום מאובטח</p>
+
+        <p className="flex items-center gap-3 pt-2 text-xs text-stone before:h-px before:flex-1 before:bg-line after:h-px after:flex-1 after:bg-line">
+          או הזמנה מהירה בוואטסאפ
+        </p>
         {/* Checkout consent */}
         <fieldset className="space-y-3 border-t border-line pt-5 text-sm leading-6">
           <legend className="sr-only">אישורים להזמנה</legend>
@@ -353,7 +366,7 @@ export default function CartView({
           rel="noopener noreferrer"
           onClick={guardSubmit}
           aria-disabled={!agreedToTerms}
-          className={`flex w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-4 text-sm text-white transition-opacity ${agreedToTerms ? "lift" : "opacity-50"}`}
+          className={`flex w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-3.5 text-sm text-white transition-opacity ${agreedToTerms ? "lift" : "opacity-50"}`}
         >
           <WhatsAppIcon />
           הזמנה בוואטסאפ

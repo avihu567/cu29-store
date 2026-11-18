@@ -1,6 +1,6 @@
 // Cart pricing & order text — shared by the product page and the cart so they
 // always agree. Client-safe (no node APIs).
-import type { CartLine } from "./cart";
+import type { CartLine, GiftSleevePick } from "./cart";
 import {
   FREE_RING_VALUE,
   GIFT_SLEEVE_THRESHOLD,
@@ -8,7 +8,7 @@ import {
   SLEEVE_PRICE,
   SLEEVE_SLUG,
 } from "./offers";
-import { RING_COLORS, formatPrice, getProduct, isPurchasable, type Product, type RingColorId } from "./products";
+import { RING_COLORS, SLEEVE_COLORS, formatPrice, getProduct, isPurchasable, type Product, type RingColorId } from "./products";
 import { remainingForFreeShipping, shippingFor } from "./shipping";
 import type { PixelContent } from "./fpixel";
 
@@ -110,6 +110,37 @@ export function lineOptions(product: Product, line: CartLine): string[] {
 export interface GiftSleeveChoice {
   size: string;
   colorName: string;
+}
+
+export interface ResolvedGiftSleeve extends GiftSleeveChoice {
+  colorId: string;
+  colorHex: string;
+  sizes: string[];
+  /** True once the cart reaches the gift threshold. */
+  active: boolean;
+}
+
+/** The gift sleeve for this cart, with defaults (size = first bottle's size). */
+export function resolveGiftSleeve(cart: PricedCart, pick: GiftSleevePick): ResolvedGiftSleeve | undefined {
+  const sleeve = getProduct(SLEEVE_SLUG);
+  const sizes = sleeve?.sizeOptions ?? [];
+  if (!sleeve || sizes.length === 0) return undefined;
+  const firstBottleSize = cart.lines.find((l) => isBottle(l.product))?.product.size;
+  const size =
+    pick.size && sizes.includes(pick.size)
+      ? pick.size
+      : firstBottleSize && sizes.includes(firstBottleSize)
+        ? firstBottleSize
+        : (sizes[1] ?? sizes[0]);
+  const color = SLEEVE_COLORS.find((c) => c.id === pick.color) ?? SLEEVE_COLORS[0];
+  return {
+    size,
+    colorName: color.name,
+    colorId: color.id,
+    colorHex: color.hex,
+    sizes,
+    active: cart.giftSleeveUnlocked,
+  };
 }
 
 /** WhatsApp order text for a priced cart. */

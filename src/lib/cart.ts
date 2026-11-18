@@ -113,3 +113,48 @@ export function setQuantity(key: string, quantity: number) {
 export function clearCart() {
   commit(EMPTY);
 }
+
+// ---------- Gift sleeve pick (tier-2 reward), shared by the cart and checkout
+
+export interface GiftSleevePick {
+  size?: string;
+  color?: string;
+}
+
+const GIFT_KEY = "cu29-gift-sleeve";
+const NO_PICK: GiftSleevePick = {};
+let giftPick: GiftSleevePick = NO_PICK;
+let giftLoaded = false;
+const giftListeners = new Set<() => void>();
+
+function getGiftSnapshot() {
+  if (!giftLoaded && typeof window !== "undefined") {
+    giftLoaded = true;
+    try {
+      const raw = window.localStorage.getItem(GIFT_KEY);
+      if (raw) giftPick = JSON.parse(raw) as GiftSleevePick;
+    } catch {
+      giftPick = NO_PICK;
+    }
+  }
+  return giftPick;
+}
+
+function subscribeGift(listener: () => void) {
+  giftListeners.add(listener);
+  return () => giftListeners.delete(listener);
+}
+
+export function useGiftSleevePick() {
+  return useSyncExternalStore(subscribeGift, getGiftSnapshot, () => NO_PICK);
+}
+
+export function setGiftSleevePick(patch: GiftSleevePick) {
+  giftPick = { ...getGiftSnapshot(), ...patch };
+  try {
+    window.localStorage.setItem(GIFT_KEY, JSON.stringify(giftPick));
+  } catch {
+    // Storage unavailable — the pick still works for this visit.
+  }
+  giftListeners.forEach((l) => l());
+}
