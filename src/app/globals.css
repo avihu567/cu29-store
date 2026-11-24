@@ -18,7 +18,7 @@
   --color-sand: #ecddd8; /* clay /35: tracks, skeletons, quiet fills */
   --color-wood-light: #f2e7e3; /* clay /25: info strips */
   --color-stone-warm: #e9d8d2; /* clay /40 */
-  --color-line: #e4cec6; /* clay /50: soft borders and dividers */
+  --color-line: #eae3dc; /* soft stone hairline */
   --color-stone-muted: #c99e8e; /* clay: placeholders, inactive dots */
   --color-clay: #c99e8e; /* packaging clay (muted blush-terracotta) */
   --color-wood: #9c7a6b;
@@ -33,6 +33,10 @@
   --color-charcoal: #25282a; /* Pantone 426 C — ring swatch only */
   --color-terracotta: #9a3a06; /* Pantone 7516 C — ring swatch only */
 
+  /* Conversion: matte charcoal CTAs and active pills, forest-green hover */
+  --color-action: #141414;
+  --color-action-hover: #1e3a2f;
+
   /* Brushed copper */
   --color-copper: #b5785c; /* CTAs, active states, progress fills */
   --color-copper-deep: #9e6348; /* hover, copper text on light surfaces */
@@ -42,8 +46,8 @@
 
   /* One soft, rounded family for everything (Hebrew + Latin). "font-serif" in
      components now means "heading voice" and maps to the same family. */
-  --font-sans: var(--font-rubik), system-ui, sans-serif;
-  --font-serif: var(--font-rubik), system-ui, sans-serif;
+  --font-sans: var(--font-heebo), "Assistant", system-ui, sans-serif;
+  --font-serif: var(--font-heebo), "Assistant", system-ui, sans-serif;
   /* Accent only: the English brand line */
   --font-display: var(--font-cormorant), Georgia, serif;
 
@@ -57,29 +61,29 @@
   --shadow-glow: 0 16px 36px -14px rgb(158 99 72 / 0.6);
 }
 
-/* ───────── Typography: airy, editorial headings ───────── */
+/* ───────── Typography: modern editorial (Heebo) ───────── */
 /*
- * Calm hierarchy (unlayered, so it wins over per-component weight utilities):
- *   headings  → medium 500, generous tracking
- *   body      → regular 400
- *   subtitles → light 300 (.text-subtle / intro paragraphs)
+ * Confident hierarchy (unlayered, so it wins over per-component weight utilities):
+ *   h1/h2 → bold 700, slightly tight     h3 → semibold 600
+ *   body  → regular 400                  subtitles → light 300 (.text-subtle)
  */
 body {
   font-weight: 400;
-  letter-spacing: 0.005em;
+  letter-spacing: 0;
 }
 h1,
 h2,
 h3 {
   color: inherit;
-  font-weight: 500;
-  letter-spacing: 0.035em;
+  font-weight: 700;
+  letter-spacing: -0.012em;
+  line-height: 1.15;
   text-wrap: balance;
 }
-/* Large display titles read heavier, so they step down to regular */
-h1 {
-  font-weight: 400;
-  letter-spacing: 0.03em;
+h3 {
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.3;
 }
 p {
   text-wrap: pretty;
@@ -95,25 +99,29 @@ p {
   letter-spacing: 0.01em;
 }
 
-/* ───────── Copper buttons: brushed copper, sweeping to #9E6348 on hover ───────── */
+/* ───────── Primary (conversion) buttons: matte charcoal → forest green ─────────
+   .btn-primary is the name to use; .btn-copper is kept as an alias so every
+   existing primary action picks up the same high-contrast style. */
+.btn-primary,
 .btn-copper {
-  background-color: var(--color-copper);
-  background-image: linear-gradient(115deg, #c08a70 0%, #b5785c 30%, #b5785c 48%, #9e6348 62%, #9e6348 100%);
-  background-size: 220% 100%;
-  background-position: 0% 50%;
+  background-color: var(--color-action);
+  background-image: none;
   color: #ffffff;
-  font-weight: 500;
-  box-shadow: var(--shadow-glow);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: 0 10px 24px -14px rgb(20 20 20 / 0.55);
   transition:
-    background-position 0.7s ease,
-    transform 0.35s ease,
-    box-shadow 0.35s ease;
+    background-color 0.3s ease,
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
+.btn-primary:hover,
 .btn-copper:hover {
-  background-position: 100% 50%;
-  transform: translateY(-2px);
-  box-shadow: 0 22px 44px -16px rgb(158 99 72 / 0.7);
+  background-color: var(--color-action-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 16px 30px -16px rgb(30 58 47 / 0.6);
 }
+.btn-primary:active,
 .btn-copper:active {
   transform: translateY(0);
 }
@@ -198,9 +206,9 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Clean, crisp white page. Warm tones live in individual panels and cards. */
+/* Warm editorial canvas; product cards and photo frames stay pure white. */
 body {
-  background-color: #ffffff;
+  background-color: var(--color-paper);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
 }
@@ -262,9 +270,9 @@ html.a11y-contrast {
   --color-copper-light: #f0c8b2;
   --color-copper-pale: #ffffff;
 }
-html.a11y-contrast .btn-copper {
-  background-image: none;
-  background-color: #6a361f;
+html.a11y-contrast .btn-copper,
+html.a11y-contrast .btn-primary {
+  background-color: #000000;
 }
 html.a11y-contrast .texture-stone,
 html.a11y-contrast .texture-clay,

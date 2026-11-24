@@ -207,7 +207,7 @@ export default function CartView({
                       onClick={() => setGiftSize(size)}
                       aria-pressed={size === giftSize}
                       className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-                        size === giftSize ? "border-ink bg-ink text-ivory" : "border-line bg-paper text-ink hover:border-copper/60"
+                        size === giftSize ? "border-action bg-action text-white" : "border-line bg-paper text-ink hover:border-copper/60"
                       }`}
                     >
                       {size}

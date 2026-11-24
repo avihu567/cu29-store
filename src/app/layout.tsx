@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Rubik } from "next/font/google";
+import { Cormorant_Garamond, Heebo } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import AccessibilityWidget from "@/components/AccessibilityWidget";
+import CartDrawer from "@/components/CartDrawer";
 import MetaPixel from "@/components/analytics/MetaPixel";
 import "./globals.css";
 
-// Primary typeface for the whole site: soft, rounded, full Hebrew support,
-// with real weights for hierarchy (300 subtitles · 400 body · 500 headings).
-const rubik = Rubik({
-  variable: "--font-rubik",
+// Primary typeface: clean, modern Hebrew + Latin, with a real bold for
+// confident headings (300 subtitles · 400 body · 600–700 headings).
+const heebo = Heebo({
+  variable: "--font-heebo",
   subsets: ["hebrew", "latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
 // Accent only: the English brand line "Pure Flow. Pure Metal." (font-display).
@@ -37,7 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="he"
       dir="rtl"
-      className={`${rubik.variable} ${cormorant.variable} h-full`}
+      className={`${heebo.variable} ${cormorant.variable} h-full`}
     >
       <body className="flex min-h-full flex-col font-sans">
         <Header />
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Footer />
         <WhatsAppFloat />
         <AccessibilityWidget />
+        <CartDrawer />
         <MetaPixel />
       </body>
     </html>

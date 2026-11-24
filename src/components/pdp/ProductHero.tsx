@@ -18,6 +18,7 @@ import {
 import { FREE_RING_VALUE, SLEEVE_BUMP_PRICE, SLEEVE_PRICE, SLEEVE_SLUG } from "@/lib/offers";
 import { buildOrderMessage, isBottle, pixelContents, priceCart } from "@/lib/pricing";
 import * as fpixel from "@/lib/fpixel";
+import { openCartDrawer } from "@/lib/cart-drawer";
 import type { CartLine } from "@/lib/cart";
 import { WhatsAppIcon } from "../icons";
 import QuantitySelector from "../QuantitySelector";
@@ -119,6 +120,7 @@ export default function ProductHero({
     pendingLines.forEach((line) => addToCart(line));
     fpixel.addToCart({ contents: pixelContents(pending), value: pending.subtotal, name: product.name });
     setAdded(true);
+    openCartDrawer();
   }
 
   /** Quick WhatsApp order = starting checkout for exactly these items. */
@@ -228,7 +230,7 @@ export default function ProductHero({
                       aria-pressed={active}
                       className={`min-w-24 rounded-full border px-5 py-2.5 text-sm transition-colors ${
                         active
-                          ? "border-ink bg-ink text-ivory"
+                          ? "border-action bg-action text-white"
                           : "border-line bg-paper/60 text-ink hover:-translate-y-0.5 hover:border-copper/60 hover:shadow-[var(--shadow-soft)]"
                       }`}
                     >
@@ -287,7 +289,7 @@ export default function ProductHero({
                       aria-pressed={active}
                       className={`min-w-24 rounded-full border px-5 py-2.5 text-sm transition-colors ${
                         active
-                          ? "border-ink bg-ink text-ivory"
+                          ? "border-action bg-action text-white"
                           : "border-line bg-paper/60 text-ink hover:-translate-y-0.5 hover:border-copper/60 hover:shadow-[var(--shadow-soft)]"
                       }`}
                     >

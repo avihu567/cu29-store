@@ -74,7 +74,7 @@ export default function ContactPage() {
           </dl>
 
           <div>
-            <h2 className="mb-2 font-serif text-2xl text-ink">שאלות נפוצות</h2>
+            <h2 id="faq" className="mb-2 scroll-mt-32 font-serif text-2xl text-ink">שאלות נפוצות</h2>
             <div className="divide-y divide-line/70 rounded-[var(--radius-card)] bg-paper/80 px-6 shadow-[var(--shadow-soft)] ring-1 ring-line/60">
               {faqs.map((f) => (
                 <details key={f.q} className="group py-4">
