@@ -17,6 +17,7 @@ import { FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
 import { WhatsAppIcon } from "./icons";
 import ProductArt from "./ProductArt";
 import ProductImage from "./ProductImage";
+import { lineImage, sleeveImages } from "@/lib/variant-images";
 import QuantitySelector from "./QuantitySelector";
 import { ButtonLink } from "./ui";
 
@@ -103,7 +104,7 @@ export default function CartView({
                 className="relative aspect-square w-20 shrink-0 overflow-hidden rounded-2xl bg-white ring-1 ring-line/60 sm:w-24"
               >
                 <ProductImage
-                  src={images[product.slug]}
+                  src={lineImage(product, line) ?? images[product.slug]}
                   art={product.art}
                   alt={product.name}
                   sizes="96px"
@@ -168,8 +169,14 @@ export default function CartView({
         {giftActive && sleeve && (
           <li className="flex gap-4 py-6 sm:gap-5">
             <div className="relative flex aspect-square w-20 shrink-0 sm:w-24 items-center justify-center overflow-hidden rounded-2xl bg-white ring-1 ring-copper/40">
-              {images[SLEEVE_SLUG] ? (
-                <ProductImage src={images[SLEEVE_SLUG]} art="sleeve" alt={sleeve.name} sizes="96px" padded={false} />
+              {(sleeveImages(giftSize, giftColor)[0]?.src ?? images[SLEEVE_SLUG]) ? (
+                <ProductImage
+                  src={sleeveImages(giftSize, giftColor)[0]?.src ?? images[SLEEVE_SLUG]}
+                  art="sleeve"
+                  alt={sleeve.name}
+                  sizes="96px"
+                  padded={false}
+                />
               ) : (
                 <ProductArt
                   variant="sleeve"

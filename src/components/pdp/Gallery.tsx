@@ -20,6 +20,7 @@ export default function Gallery({
   badge,
   ringColor,
   placeholder = false,
+  initialIndex = 0,
 }: {
   images: GalleryImage[];
   art: ArtVariant;
@@ -29,10 +30,13 @@ export default function Gallery({
   ringColor?: string;
   /** No photos yet: show the branded placeholder instead of the drawing. */
   placeholder?: boolean;
+  /** Image to show first (e.g. the sleeve photo right after the sleeve is chosen). */
+  initialIndex?: number;
 }) {
-  const [active, setActive] = useState(0);
+  const start = initialIndex > 0 && initialIndex < images.length ? initialIndex : 0;
+  const [active, setActive] = useState(start);
   // Images that have been shown at least once (so they stay mounted for the fade).
-  const [seen, setSeen] = useState<Set<number>>(() => new Set([0]));
+  const [seen, setSeen] = useState<Set<number>>(() => new Set([0, start]));
   const dialogRef = useRef<HTMLDialogElement>(null);
   const hasThumbs = images.length > 1;
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import BrandMark from "@/components/BrandMark";
 import LifestylePhoto from "@/components/LifestylePhoto";
+import StudioGallery from "@/components/StudioGallery";
 import OrganicDivider from "@/components/OrganicDivider";
 import ProductArt from "@/components/ProductArt";
 import ProductCard from "@/components/ProductCard";
@@ -146,6 +147,9 @@ export default function Home() {
           </div>
         </Container>
       </section>
+
+      {/* ───────── Studio collection (clean product photography) ───────── */}
+      <StudioGallery />
 
       {/* ───────── Ritual teaser ───────── */}
       <section className="mb-28 px-3 sm:mb-40 sm:px-5">

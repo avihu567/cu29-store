@@ -6,6 +6,7 @@ import { lineOptions, type PricedCart, type ResolvedGiftSleeve } from "@/lib/pri
 import { formatPrice } from "@/lib/products";
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
 import ProductImage from "../ProductImage";
+import { lineImage } from "@/lib/variant-images";
 
 export default function OrderSummary({
   cart,
@@ -45,7 +46,7 @@ export default function OrderSummary({
           <li key={[line.slug, line.color, line.size, line.offer].join(":")} className="flex gap-3.5 py-4">
             <div className="relative aspect-square w-16 shrink-0 overflow-hidden rounded-xl bg-white ring-1 ring-line/60">
               <ProductImage
-                src={images[product.slug]}
+                src={lineImage(product, line) ?? images[product.slug]}
                 art={product.art}
                 alt={product.name}
                 sizes="64px"

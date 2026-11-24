@@ -22,6 +22,7 @@ import type { CartLine } from "@/lib/cart";
 import { WhatsAppIcon } from "../icons";
 import QuantitySelector from "../QuantitySelector";
 import Gallery from "./Gallery";
+import { bottleVariantImages, ringImages, sleeveImages } from "@/lib/variant-images";
 import NotifyForm from "./NotifyForm";
 import StarRating from "./StarRating";
 import {
@@ -56,6 +57,8 @@ export default function ProductHero({
   // Order bump: discounted, size-matched cooling sleeve (bottles only)
   const [bumpOn, setBumpOn] = useState(false);
   const [sleeveColor, setSleeveColor] = useState(SLEEVE_COLORS[0].id);
+  // Which choice the shopper touched last, so the gallery opens on the matching photo.
+  const [lastPicked, setLastPicked] = useState<"bottle" | "sleeve">("bottle");
 
   const title = product.title ?? product.name;
   const price = product.price;
@@ -67,6 +70,22 @@ export default function ProductHero({
     isBottle(product) && Boolean(product.size) && Boolean(sleeveProduct && isPurchasable(sleeveProduct));
   const bumpActive = bumpAvailable && bumpOn;
   const sleeveColorName = SLEEVE_COLORS.find((c) => c.id === sleeveColor)?.name;
+
+  // Gallery follows the selection: studio photos of the exact variant first,
+  // then the product's regular gallery (duplicates removed).
+  const baseImages = imagesBySlug[product.slug] ?? [];
+  const variantImages: GalleryImage[] = product.ringColors
+    ? bottleVariantImages(product.size, color)
+    : product.slug === SLEEVE_SLUG
+      ? sleeveImages(optSize, optColor)
+      : product.slug === "silicone-carry-ring"
+        ? ringImages(optColor)
+        : [];
+  const sleevePreview = bumpActive ? sleeveImages(product.size, sleeveColor) : [];
+  const leading = [...variantImages, ...sleevePreview];
+  const galleryImages = [...leading, ...baseImages.filter((img) => !leading.some((l) => l.src === img.src))];
+  const galleryStart = bumpActive && lastPicked === "sleeve" ? variantImages.length : 0;
+  const galleryKey = [product.slug, color, optSize, optColor, bumpActive ? sleeveColor : "", galleryStart].join("|");
 
   // What "add to cart" will add — priced with the same rules as the cart.
   const pendingLines: CartLine[] =
@@ -85,6 +104,7 @@ export default function ProductHero({
   function selectSize(next: Product) {
     setSlug(next.slug);
     setAdded(false);
+    setLastPicked("bottle");
     if (color && !next.ringColors?.includes(color)) setColor(next.ringColors?.[0]);
     // Keep the URL shareable without a full navigation.
     window.history.replaceState(null, "", `/product/${next.slug}`);
@@ -136,8 +156,9 @@ export default function ProductHero({
       <div className="mx-auto grid max-w-7xl gap-10 px-4 pb-16 pt-6 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:gap-20 lg:px-8 lg:pb-24">
         <div className="mx-auto w-full min-w-0 max-w-lg lg:sticky lg:top-32 lg:max-w-none lg:self-start">
           <Gallery
-            key={product.slug}
-            images={imagesBySlug[product.slug] ?? []}
+            key={galleryKey}
+            images={galleryImages}
+            initialIndex={galleryStart}
             art={product.art}
             alt={product.name}
             badge={product.isComingSoon ? "בקרוב בקולקציה" : product.badge}
@@ -200,7 +221,10 @@ export default function ProductHero({
                     <button
                       key={size}
                       type="button"
-                      onClick={() => setOptSize(size)}
+                      onClick={() => {
+                        setOptSize(size);
+                        setLastPicked("bottle");
+                      }}
                       aria-pressed={active}
                       className={`min-w-24 rounded-full border px-5 py-2.5 text-sm transition-colors ${
                         active
@@ -228,7 +252,10 @@ export default function ProductHero({
                     <button
                       key={c.id}
                       type="button"
-                      onClick={() => setOptColor(c.id)}
+                      onClick={() => {
+                        setOptColor(c.id);
+                        setLastPicked("bottle");
+                      }}
                       aria-pressed={active}
                       aria-label={c.name}
                       title={c.name}
@@ -300,7 +327,10 @@ export default function ProductHero({
                     <button
                       key={id}
                       type="button"
-                      onClick={() => setColor(id)}
+                      onClick={() => {
+                        setColor(id);
+                        setLastPicked("bottle");
+                      }}
                       aria-pressed={active}
                       aria-label={c.name}
                       title={c.name}
@@ -326,7 +356,10 @@ export default function ProductHero({
                 <input
                   type="checkbox"
                   checked={bumpOn}
-                  onChange={(e) => setBumpOn(e.target.checked)}
+                  onChange={(e) => {
+                    setBumpOn(e.target.checked);
+                    setLastPicked(e.target.checked ? "sleeve" : "bottle");
+                  }}
                   className="mt-1 h-4 w-4 shrink-0 accent-copper"
                 />
                 <span>
@@ -352,7 +385,10 @@ export default function ProductHero({
                           <button
                             key={c.id}
                             type="button"
-                            onClick={() => setSleeveColor(c.id)}
+                            onClick={() => {
+                              setSleeveColor(c.id);
+                              setLastPicked("sleeve");
+                            }}
                             aria-pressed={active}
                             aria-label={`שרוול ${c.name}`}
                             title={c.name}

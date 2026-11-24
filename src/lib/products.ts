@@ -1,4 +1,5 @@
 import { RING_PRICE, RING_SLUG, SLEEVE_PRICE, SLEEVE_SLUG } from "./offers";
+import { RINGS_PAIR, ringImages, sleeveImages } from "./variant-images";
 
 export type CategoryId = "bottles" | "vessels" | "cups" | "jewelry";
 
@@ -47,7 +48,7 @@ export interface ColorOption {
 /** Cooling sleeve colors. */
 export const SLEEVE_COLORS: ColorOption[] = [
   { id: "pink", name: "ורוד", hex: "#E2B4AA" },
-  { id: "gray", name: "אפור", hex: "#A5A19B" },
+  { id: "gray", name: "אפור", hex: "#4A4B4D" }, // dark charcoal-gray, as photographed
 ];
 
 export interface ProductDimensions {
@@ -261,6 +262,12 @@ export const products: Product[] = [
     subtitle: "שרוול תואם מידה לבקבוקי CU29",
     category: "bottles",
     imageDir: "/images/cooling-sleeve",
+    gallery: [
+      ...sleeveImages("700 מ״ל", "pink"),
+      ...sleeveImages("700 מ״ל", "gray"),
+      ...sleeveImages("500 מ״ל", "pink"),
+      ...sleeveImages("500 מ״ל", "gray"),
+    ],
     price: SLEEVE_PRICE,
     art: "sleeve",
     accessory: true,
@@ -284,6 +291,7 @@ export const products: Product[] = [
     subtitle: "טבעת נשיאה לבקבוקי CU29",
     category: "bottles",
     imageDir: "/images/silicone-ring",
+    gallery: [...ringImages(), ...ringImages("terracotta").filter((i) => i.src !== RINGS_PAIR.src)],
     price: RING_PRICE,
     art: "carry-ring",
     accessory: true,
