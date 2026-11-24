@@ -27,9 +27,9 @@ const TILES = [
     sizes: "(min-width: 1024px) 25vw, 50vw",
   },
   {
-    ...LIFESTYLE.closeup,
+    ...LIFESTYLE.family3,
     href: "/product/cu29-cooling-sleeve",
-    caption: "שרוול קירור ממותג",
+    caption: "שרוול קירור ממותג – אפור כהה או ורוד",
     className: "lg:col-span-2",
     sizes: "(min-width: 1024px) 50vw, 100vw",
   },
@@ -72,7 +72,11 @@ export default function StudioGallery() {
                   fill
                   sizes={t.sizes}
                   loading="lazy"
-                  className="object-contain p-3 transition-transform duration-700 ease-out group-hover:scale-[1.03] sm:p-5"
+                  className={`object-contain transition-transform duration-700 ease-out ${
+                    i === 3
+                      ? "scale-[1.22] group-hover:scale-[1.26]" // wide tile: trim the photo’s white margins
+                      : "p-3 group-hover:scale-[1.03] sm:p-5"
+                  }`}
                 />
               </div>
               <span className="pointer-events-none absolute bottom-3 start-3 rounded-full bg-ivory/90 px-3.5 py-1.5 text-xs text-ink shadow-[var(--shadow-soft)] ring-1 ring-line/50 backdrop-blur">
