@@ -1,251 +1,195 @@
-import Image from "next/image";
 import Link from "next/link";
+import BrandMark from "@/components/BrandMark";
+import LifestylePhoto from "@/components/LifestylePhoto";
+import StudioGallery from "@/components/StudioGallery";
+import OrganicDivider from "@/components/OrganicDivider";
+import ProductArt from "@/components/ProductArt";
 import ProductCard from "@/components/ProductCard";
 import Reviews from "@/components/Reviews";
-import { GIFT_SLEEVE_THRESHOLD } from "@/lib/offers";
-import { getProduct, isPurchasable, type Product } from "@/lib/products";
-import { FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
-import { LIFESTYLE } from "@/lib/variant-images";
+import { ButtonLink, Container, Eyebrow, SectionHeading } from "@/components/ui";
+import { getLifestyleAlt, getLifestyleImage } from "@/lib/lifestyle";
+import { products } from "@/lib/products";
 
-// ───────────── content ─────────────
-
-const COLLECTION_SLUGS = [
-  "copper-bottle-500ml",
-  "copper-bottle-700ml",
-  "copper-bottle-950ml",
-  "cu29-cooling-sleeve",
-  "silicone-carry-ring",
-];
-
-const stroke = { fill: "none", stroke: "currentColor", strokeWidth: 1.4, strokeLinecap: "round", strokeLinejoin: "round" } as const;
-
-const BENEFITS = [
+const pillars = [
   {
-    title: "99.9% נחושת טהורה",
-    text: "ללא ציפוי וללא לכה",
-    icon: (
-      <svg viewBox="0 0 32 32" className="h-8 w-8" aria-hidden="true">
-        <rect x="6" y="6" width="20" height="20" rx="3" {...stroke} />
-        <text x="16" y="20.5" textAnchor="middle" fontSize="10" fontWeight="600" fill="currentColor" fontFamily="inherit">
-          Cu
-        </text>
-      </svg>
-    ),
+    title: "נחושת טהורה 99.9%",
+    text: "ללא ציפוי, ללא לכה וללא סגסוגות. המים פוגשים את המתכת עצמה.",
   },
   {
-    title: "איורוודה וטיהור טבעי",
-    text: "מסורת מים בת אלפי שנים",
-    icon: (
-      <svg viewBox="0 0 32 32" className="h-8 w-8" aria-hidden="true">
-        <path d="M16 5c5 6.5 8 11 8 14.5a8 8 0 0 1-16 0C8 16 11 11.5 16 5Z" {...stroke} />
-        <path d="M12.5 20.5a3.6 3.6 0 0 0 3.5 3" {...stroke} />
-      </svg>
-    ),
+    title: "חוכמה איורוודית",
+    text: "טמרה ג׳לה – מים שנחו בנחושת – טקס טהרה בן למעלה מ־5,000 שנה.",
   },
   {
-    title: "טבעת סיליקון מתנה",
-    text: "עם כל בקבוק, בפחם או בוורוד עתיק",
-    icon: (
-      <svg viewBox="0 0 32 32" className="h-8 w-8" aria-hidden="true">
-        <circle cx="11" cy="16" r="5.5" {...stroke} />
-        <path d="M16.2 13.2h9.3a2.8 2.8 0 0 1 0 5.6h-9.3" {...stroke} />
-      </svg>
-    ),
-  },
-  {
-    title: "משלוח מהיר עד הבית",
-    text: `חינם ברכישה מעל ₪${FREE_SHIPPING_THRESHOLD - 1}`,
-    icon: (
-      <svg viewBox="0 0 32 32" className="h-8 w-8" aria-hidden="true">
-        <path d="M4 9h14v13H4zM18 13h5.5l4 4.5V22H18" {...stroke} />
-        <circle cx="9" cy="23.5" r="2.2" {...stroke} />
-        <circle cx="22.5" cy="23.5" r="2.2" {...stroke} />
-      </svg>
-    ),
+    title: "עבודת יד",
+    text: "כל פריט מעוצב ומלוטש ביד. סימני העבודה הקטנים הם חלק מהיופי.",
   },
 ];
-
-const RITUAL_STEPS = [
-  ["ערב", "ממלאים את הבקבוק במים נקיים"],
-  ["לילה", "6–8 שעות של מנוחה בנחושת"],
-  ["בוקר", "כוס ראשונה על בטן ריקה"],
-];
-
-// ───────────── page ─────────────
 
 export default function Home() {
-  const collection = COLLECTION_SLUGS.map(getProduct).filter(
-    (p): p is Product => Boolean(p && isPurchasable(p)),
-  );
+  const featured = products.filter((p) => p.featured).slice(0, 4);
+  const heroPhoto = getLifestyleImage("hero");
+  const heroDetailPhoto = getLifestyleImage("hero-2");
+  const philosophyPhoto = getLifestyleImage("philosophy");
+  const bannerPhoto = getLifestyleImage("banner");
 
   return (
     <>
-      {/* ───────── Hero: full-bleed, editorial ───────── */}
-      <section className="border-b border-line bg-white">
-        <div className="mx-auto grid max-w-7xl items-center gap-8 px-5 pb-14 pt-6 sm:px-8 lg:min-h-[min(82vh,46rem)] lg:grid-cols-[1fr_1.15fr] lg:gap-12 lg:px-10 lg:py-10">
-          <div className="order-2 lg:order-1">
-            <p className="font-display text-sm tracking-[0.3em] text-copper-deep" dir="ltr" style={{ textAlign: "right" }}>
-              THE CU RITUAL
-            </p>
-            <h1 className="mt-4 text-[2.6rem] text-ink sm:text-6xl lg:text-[4.25rem]">
-              הריטואל היומי שלך.
+      {/* ───────── Hero: clean, airy, editorial ───────── */}
+      <section className="overflow-hidden">
+        <Container className="grid items-center gap-14 pb-20 pt-8 sm:pt-12 lg:min-h-[min(86vh,50rem)] lg:grid-cols-[1fr_1.1fr] lg:gap-20 lg:pb-24 lg:pt-6">
+          {/* copy (right side in RTL) */}
+          <div className="order-2 max-w-xl lg:order-1">
+            <h1
+              className="font-display text-[3.5rem] leading-[0.95] text-ink sm:text-[5rem] lg:text-[6.25rem]"
+              dir="ltr"
+              style={{ textAlign: "right" }}
+            >
+              Pure Flow.
               <br />
-              <span className="text-copper-deep">נחושת טהורה.</span>
+              <span className="text-copper-glow">Pure Metal.</span>
             </h1>
-            <p className="mt-6 max-w-md text-lg leading-8 text-stone">
-              בקבוקי נחושת טהורה 99.9%, בהשראת טקס המים האיורוודי. ממלאים בערב, שותים בבוקר – וכל לגימה
-              הופכת לרגע של איזון.
+
+            <p className="text-subtle mt-8 max-w-md text-lg leading-9 text-ink/70">
+              הזמנה לעצור, לנשום ולהתחבר מחדש לקצב הטבעי של הגוף. בקבוקים, מיכלי
+              מים, כוסות וצמידים מנחושת טהורה, בהשראת חוכמה עתיקה.
             </p>
-            <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-4">
-              <Link href="#collection" className="btn-primary inline-flex items-center justify-center rounded-full px-10 py-4 text-[15px]">
-                לבחירת הבקבוק שלך
-              </Link>
-              <Link href="/ritual" className="link-underline text-[15px] font-medium text-ink">
-                איך זה עובד?
-              </Link>
+
+            <div className="mt-10 flex flex-wrap gap-3">
+              <ButtonLink href="/shop">לקולקציה</ButtonLink>
+              <ButtonLink href="/ritual" variant="outline">
+                גלו את הטקס
+              </ButtonLink>
             </div>
-            <p className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm text-stone">
-              <span>🎁 טבעת סיליקון במתנה</span>
-              <span>· משלוח חינם מעל ₪{FREE_SHIPPING_THRESHOLD - 1}</span>
-              <span>· ביטול עסקה עד 14 יום</span>
-            </p>
           </div>
 
-          <div className="relative order-1 aspect-[4/3] w-full lg:order-2">
-            <Image
-              src={LIFESTYLE.family5.src}
-              alt={LIFESTYLE.family5.alt}
-              fill
-              priority
-              sizes="(min-width: 1024px) 55vw, 100vw"
-              className="object-contain"
+          {/* image composition (left side in RTL) */}
+          <div className="relative order-1 mx-auto w-full max-w-[19rem] sm:max-w-sm lg:order-2 lg:max-w-none">
+            {/* soft sand shape behind the photo */}
+            <div
+              className="absolute -inset-4 -z-10 translate-x-[-4%] translate-y-[5%] bg-cream sm:-inset-6"
+              style={{ borderRadius: "46% 54% 42% 58% / 52% 44% 56% 48%" }}
             />
-          </div>
-        </div>
-      </section>
-
-      {/* ───────── 4-pillar benefit strip ───────── */}
-      <section aria-label="היתרונות שלנו" className="border-b border-line bg-paper">
-        <ul className="mx-auto grid max-w-7xl grid-cols-2 gap-px px-5 sm:px-8 lg:grid-cols-4 lg:px-10">
-          {BENEFITS.map((b) => (
-            <li key={b.title} className="flex flex-col items-center gap-2.5 px-3 py-8 text-center text-ink sm:flex-row sm:text-start">
-              <span className="shrink-0 text-ink">{b.icon}</span>
-              <span>
-                <span className="block text-[15px] font-semibold">{b.title}</span>
-                <span className="block text-sm text-stone">{b.text}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* ───────── Product showcase ───────── */}
-      <section id="collection" className="scroll-mt-32 py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-          <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-sm font-medium text-copper-deep">הקולקציה</p>
-              <h2 className="mt-2 text-3xl text-ink sm:text-5xl">בחרו את הבקבוק שלכם</h2>
+            <div className="relative aspect-[4/5] overflow-hidden bg-cream shadow-[var(--shadow-lift)]" style={{ borderRadius: "var(--radius-organic)" }}>
+              {heroPhoto ? (
+                <LifestylePhoto
+                  src={heroPhoto}
+                  alt={getLifestyleAlt("hero")}
+                  sizes="(min-width: 1024px) 45vw, 90vw"
+                  priority
+                  tint={false}
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <ProductArt variant="bottle" ringColor="#9A3A06" className="h-[78%] w-auto drop-shadow-[18px_30px_28px_rgba(91,63,44,0.3)]" />
+                </div>
+              )}
             </div>
-            <Link href="/shop" className="link-underline text-sm font-medium text-ink">
+
+            {heroDetailPhoto && (
+              <div className="absolute -bottom-10 -start-4 aspect-square w-36 overflow-hidden rounded-[1.75rem] border-[6px] border-white shadow-[var(--shadow-lift)] sm:-start-10 sm:w-48">
+                <LifestylePhoto src={heroDetailPhoto} alt={getLifestyleAlt("hero-2")} sizes="12rem" tint={false} />
+              </div>
+            )}
+
+          </div>
+        </Container>
+      </section>
+
+      {/* ───────── Philosophy ───────── */}
+      <section className="py-28 sm:py-36 lg:py-44">
+        <Container className="grid items-center gap-16 lg:grid-cols-[1fr_1.2fr] lg:gap-28">
+          <div className="relative flex justify-center">
+            <div className="relative flex aspect-square w-full max-w-md items-center justify-center overflow-hidden rounded-full bg-cream">
+              {philosophyPhoto ? (
+                <LifestylePhoto src={philosophyPhoto} alt={getLifestyleAlt("philosophy")} sizes="(min-width: 1024px) 28rem, 90vw" />
+              ) : (
+                <BrandMark logo="element" decorative className="h-1/2 text-tobacco/80" />
+              )}
+              <span className="absolute bottom-6 end-6 rounded-full bg-paper px-5 py-2.5 text-sm text-copper-deep shadow-[0_12px_30px_-14px_rgba(91,63,44,0.4)]">
+                Cu · 29 · נחושת
+              </span>
+            </div>
+          </div>
+          <div>
+            <SectionHeading
+              eyebrow="הפילוסופיה שלנו"
+              title={<>חזרה אל היסודות.<br />טהרה יומיומית.</>}
+              intro="בעולם מודרני שרץ קדימה, CU29 הוא ההזמנה שלך לעצור. מתוך חוכמת האיורוודה העתיקה וטהרת מתכת הנחושת, יצרנו שגרת בריאות שמעניקה צלילות, אנרגיה וחיוניות מחודשת בכל רגע."
+            />
+            <OrganicDivider mark={false} className="mt-14 justify-start [&>svg:last-child]:hidden" />
+            <ul className="mt-10 grid gap-10 sm:grid-cols-3">
+              {pillars.map((p, i) => (
+                <li key={p.title} className="reveal">
+                  <span className="font-serif text-2xl text-copper/70" dir="ltr">0{i + 1}</span>
+                  <h3 className="mt-3 font-serif text-xl text-ink">{p.title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-stone">{p.text}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Container>
+      </section>
+
+      {/* ───────── Featured products ───────── */}
+      <section className="pb-28 sm:pb-40">
+        <Container>
+          <OrganicDivider className="mb-20 sm:mb-28" />
+          <div className="mb-14 flex flex-wrap items-end justify-between gap-6">
+            <SectionHeading eyebrow="נבחרים" title="האהובים ביותר" />
+            <Link href="/shop" className="text-sm text-copper-deep underline-offset-8 hover:underline">
               לכל המוצרים ←
             </Link>
           </div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-6 lg:grid-cols-3">
-            {collection.map((p) => (
+          <div className="grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-6 lg:grid-cols-4">
+            {featured.map((p) => (
               <ProductCard key={p.slug} product={p} />
             ))}
-            {/* Offer tile completes the grid */}
-            <Link
-              href="/shop#bottles"
-              className="reveal col-span-2 flex min-h-56 flex-col justify-between rounded-2xl bg-action p-7 text-white transition-colors hover:bg-action-hover lg:col-span-1"
-            >
-              <span className="text-sm text-white/70">הטבה</span>
-              <span>
-                <span className="block text-2xl font-bold leading-tight">שרוול קירור במתנה</span>
-                <span className="mt-2 block text-sm leading-6 text-white/75">
-                  ברכישה מעל ₪{GIFT_SLEEVE_THRESHOLD}, יחד עם משלוח חינם וטבעת סיליקון לכל בקבוק.
-                </span>
-              </span>
-              <span className="mt-6 text-sm font-semibold">לבחירת הבקבוק ←</span>
-            </Link>
           </div>
-        </div>
+        </Container>
       </section>
 
-      {/* ───────── Ritual & care: editorial split ───────── */}
-      <section className="border-y border-line bg-white py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl space-y-20 px-5 sm:space-y-28 sm:px-8 lg:px-10">
-          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-white ring-1 ring-line">
-              <Image
-                src={LIFESTYLE.bottleRings.src}
-                alt={LIFESTYLE.bottleRings.alt}
-                fill
-                loading="lazy"
-                sizes="(min-width: 1024px) 50vw, 100vw"
-                className="object-contain"
-              />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-copper-deep">הריטואל · Tamra Jal</p>
-              <h2 className="mt-2 text-3xl text-ink sm:text-5xl">ממלאים בערב. שותים בבוקר.</h2>
-              <p className="mt-5 max-w-lg text-lg leading-8 text-stone">
-                במסורת האיורוודית, מים שנחו לילה שלם בכלי נחושת טהורה נחשבים מאוזנים ונקיים. הטקס
-                פשוט: מספיקות כמה שעות של מגע בין המים למתכת.
-              </p>
-              <ol className="mt-8 grid gap-3 sm:grid-cols-3">
-                {RITUAL_STEPS.map(([t, d], i) => (
-                  <li key={t} className="rounded-2xl bg-paper p-5 ring-1 ring-line">
-                    <span className="text-sm font-semibold text-copper-deep" dir="ltr">
-                      0{i + 1}
-                    </span>
-                    <p className="mt-2 text-lg font-semibold text-ink">{t}</p>
-                    <p className="mt-1 text-sm leading-6 text-stone">{d}</p>
-                  </li>
-                ))}
-              </ol>
-              <Link href="/ritual" className="link-underline mt-8 inline-block text-[15px] font-medium text-ink">
-                לקריאה על הריטואל ←
-              </Link>
-            </div>
-          </div>
+      {/* ───────── Studio collection (clean product photography) ───────── */}
+      <StudioGallery />
 
-          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-white ring-1 ring-line lg:order-2">
-              <Image
-                src={LIFESTYLE.bottleBox.src}
-                alt={LIFESTYLE.bottleBox.alt}
-                fill
-                loading="lazy"
-                sizes="(min-width: 1024px) 50vw, 100vw"
-                className="object-contain"
-              />
+      {/* ───────── Ritual teaser ───────── */}
+      <section className="mb-28 px-3 sm:mb-40 sm:px-5">
+        <div className="relative isolate overflow-hidden rounded-[2rem] bg-tobacco-deep text-ivory sm:rounded-[2.75rem]">
+          {bannerPhoto && (
+            <div className="absolute inset-0 -z-10">
+              <LifestylePhoto src={bannerPhoto} alt={getLifestyleAlt("banner")} sizes="100vw" tint={false} />
+              <div className="absolute inset-0 bg-gradient-to-l from-tobacco-deep via-tobacco-deep/85 to-tobacco-deep/40" />
             </div>
-            <div className="lg:order-1">
-              <p className="text-sm font-medium text-copper-deep">טיפוח</p>
-              <h2 className="mt-2 text-3xl text-ink sm:text-5xl">ברק טבעי, בשתי דקות.</h2>
-              <p className="mt-5 max-w-lg text-lg leading-8 text-stone">
-                נחושת אמיתית מתכהה עם הזמן – זה סימן לטוהר שלה. להחזרת הברק מספיקים חצי לימון ומעט מלח
-                גס.
+          )}
+          <Container className="grid items-center gap-14 py-24 sm:py-36 lg:grid-cols-2">
+            <div>
+              <Eyebrow light>הטקס · Tamra Jal</Eyebrow>
+              <h2 className="font-serif text-4xl font-light leading-[1.1] sm:text-6xl">
+                ממלאים בערב.
+                <br />
+                <span className="text-copper-light">שותים בבוקר.</span>
+              </h2>
+              <p className="mt-7 max-w-md leading-8 text-ivory/65">
+                לפחות שש שעות של מגע בין המים לנחושת. זה כל הסוד. גלו את המסורת,
+                את כוחה של המתכת ואת הדרך הנכונה לשמור עליה.
               </p>
-              <ul className="mt-7 space-y-3 text-[15px] text-ink">
-                {[
-                  "שפשוף עדין עם חצי לימון ומלח גס",
-                  "שטיפה במים פושרים וייבוש במטלית רכה",
-                  "מים קרים או בטמפרטורת החדר בלבד, בלי מדיח",
-                ].map((t) => (
-                  <li key={t} className="flex items-start gap-3">
-                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-copper" aria-hidden="true" />
-                    {t}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/ritual#care" className="link-underline mt-8 inline-block text-[15px] font-medium text-ink">
-                המדריך המלא לטיפוח ←
-              </Link>
+              <ButtonLink href="/ritual" variant="cream" className="mt-10">
+                לקריאה על הטקס
+              </ButtonLink>
             </div>
-          </div>
+            <ol className="grid gap-3 sm:grid-cols-3">
+              {[
+                ["ערב", "ממלאים במים נקיים"],
+                ["לילה", "6–8 שעות של מנוחה"],
+                ["בוקר", "כוס על בטן ריקה"],
+              ].map(([t, d], i) => (
+                <li key={t} className="reveal rounded-3xl bg-ivory/[0.06] p-7 ring-1 ring-ivory/10 backdrop-blur-sm transition-colors duration-500 hover:bg-ivory/[0.1] hover:ring-copper-light/30">
+                  <span className="font-serif text-4xl text-copper-light" dir="ltr">{i + 1}</span>
+                  <p className="mt-6 font-serif text-2xl">{t}</p>
+                  <p className="mt-2 text-sm leading-6 text-ivory/55">{d}</p>
+                </li>
+              ))}
+            </ol>
+          </Container>
         </div>
       </section>
 
